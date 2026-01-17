@@ -3,7 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Calendar, CheckSquare, Heart, Activity, FileText, CalendarDays, Trash2 } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Calendar, CheckSquare, Heart, Activity, FileText, CalendarDays, Trash2, Pencil, X, Check } from "lucide-react"
 import type { CardType, CardColor, Mood } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
@@ -95,6 +97,10 @@ export function JournalCard({
 }: JournalCardProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editTitle, setEditTitle] = useState(title)
+  const [editContent, setEditContent] = useState(content)
+  const [isSaving, setIsSaving] = useState(false)
 
   const { icon: Icon, label } = typeConfig[type]
   const colorClass = colorClasses[color]
@@ -115,6 +121,42 @@ export function JournalCard({
       console.error("Error deleting card:", error)
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const handleEdit = () => {
+    setEditTitle(title)
+    setEditContent(content)
+    setIsEditing(true)
+  }
+
+  const handleCancelEdit = () => {
+    setIsEditing(false)
+    setEditTitle(title)
+    setEditContent(content)
+  }
+
+  const handleSaveEdit = async () => {
+    if (isSaving || isReadOnly) return
+    if (!editTitle.trim() || !editContent.trim()) return
+
+    setIsSaving(true)
+
+    try {
+      const response = await fetch(`/api/cards/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: editTitle.trim(), content: editContent.trim() }),
+      })
+
+      if (response.ok) {
+        setIsEditing(false)
+        router.refresh()
+      }
+    } catch (error) {
+      console.error("Error updating card:", error)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -142,24 +184,80 @@ export function JournalCard({
             )}
           </div>
           {!isReadOnly && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-destructive"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              <span className="sr-only">Eliminar</span>
-            </Button>
+            <div className="flex items-center gap-1">
+              {isEditing ? (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                    onClick={handleCancelEdit}
+                    disabled={isSaving}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    <span className="sr-only">Cancelar</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-green-600"
+                    onClick={handleSaveEdit}
+                    disabled={isSaving || !editTitle.trim() || !editContent.trim()}
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                    <span className="sr-only">Guardar</span>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                    onClick={handleEdit}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    <span className="sr-only">Editar</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span className="sr-only">Eliminar</span>
+                  </Button>
+                </>
+              )}
+            </div>
           )}
         </div>
-        <CardTitle className="text-base leading-tight">{title}</CardTitle>
+        {isEditing ? (
+          <Input
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            className="text-base font-semibold bg-background/50"
+            placeholder="Título"
+          />
+        ) : (
+          <CardTitle className="text-base leading-tight">{title}</CardTitle>
+        )}
       </CardHeader>
       <CardContent className="pt-0">
-        <p className="text-sm text-muted-foreground leading-relaxed">{content}</p>
+        {isEditing ? (
+          <Textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className="text-sm bg-background/50 min-h-[80px] resize-none"
+            placeholder="Contenido"
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground leading-relaxed">{content}</p>
+        )}
 
-        {(detectedDate || hasCalendarAction || hasTaskAction) && (
+        {!isEditing && (detectedDate || hasCalendarAction || hasTaskAction) && (
           <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border/50">
             {detectedDate && (
               <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
