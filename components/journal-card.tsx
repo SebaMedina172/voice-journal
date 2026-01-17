@@ -20,6 +20,7 @@ interface JournalCardProps {
   hasCalendarAction: boolean
   hasTaskAction: boolean
   createdAt: string
+  isReadOnly?: boolean
 }
 
 const typeConfig: Record<CardType, { icon: typeof Heart; label: string }> = {
@@ -90,6 +91,7 @@ export function JournalCard({
   detectedDate,
   hasCalendarAction,
   hasTaskAction,
+  isReadOnly = false,
 }: JournalCardProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
@@ -98,7 +100,7 @@ export function JournalCard({
   const colorClass = colorClasses[color]
 
   const handleDelete = async () => {
-    if (isDeleting) return
+    if (isDeleting || isReadOnly) return
     setIsDeleting(true)
 
     try {
@@ -139,16 +141,18 @@ export function JournalCard({
               </Badge>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-destructive"
-            onClick={handleDelete}
-            disabled={isDeleting}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            <span className="sr-only">Eliminar</span>
-          </Button>
+          {!isReadOnly && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              <span className="sr-only">Eliminar</span>
+            </Button>
+          )}
         </div>
         <CardTitle className="text-base leading-tight">{title}</CardTitle>
       </CardHeader>
@@ -163,13 +167,13 @@ export function JournalCard({
                 {formattedDate}
               </span>
             )}
-            {hasCalendarAction && (
+            {!isReadOnly && hasCalendarAction && (
               <Button variant="outline" size="sm" className="h-7 text-xs gap-1 bg-transparent">
                 <Calendar className="h-3 w-3" />
                 Agendar
               </Button>
             )}
-            {hasTaskAction && (
+            {!isReadOnly && hasTaskAction && (
               <Button variant="outline" size="sm" className="h-7 text-xs gap-1 bg-transparent">
                 <CheckSquare className="h-3 w-3" />
                 Crear tarea
