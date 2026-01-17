@@ -10,13 +10,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LogOut, User, Calendar } from "lucide-react"
+import { LogOut, User } from "lucide-react"
+import { DatePicker } from "@/components/date-picker"
 
 interface AppHeaderProps {
   userEmail: string
+  selectedDate: Date
 }
 
-export function AppHeader({ userEmail }: AppHeaderProps) {
+export function AppHeader({ userEmail, selectedDate }: AppHeaderProps) {
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -26,23 +28,13 @@ export function AppHeader({ userEmail }: AppHeaderProps) {
     router.refresh()
   }
 
-  const today = new Date().toLocaleDateString("es-ES", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
-
   return (
     <header className="border-b bg-card">
       <div className="container mx-auto px-4 py-4 max-w-4xl">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
             <h1 className="text-xl font-semibold tracking-tight">Daily Voice Journal</h1>
-            <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5" />
-              <span className="capitalize">{today}</span>
-            </p>
+            <DatePicker selectedDate={selectedDate} />
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

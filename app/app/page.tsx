@@ -4,20 +4,41 @@ import { JournalInput } from "@/components/journal-input"
 import { CardsGrid } from "@/components/cards-grid"
 import { AppHeader } from "@/components/app-header"
 
-export default async function AppPage() {
+interface PageProps {
+  searchParams: Promise<{ date?: string }>
+}
+
+export default async function AppPage({ searchParams }: PageProps) {
   const supabase = await createClient()
+  const params = await searchParams
 
   const { data, error } = await supabase.auth.getUser()
   if (error || !data?.user) {
     redirect("/auth/login")
   }
 
-  const today = new Date().toISOString().split("T")[0]
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayStr = today.toISOString().split("T")[0]
 
-  // Obtener o crear el día actual
-  const { data: day } = await supabase.from("days").select("*").eq("user_id", data.user.id).eq("date", today).single()
+  const selectedDateStr = params.date || todayStr
+  const selectedDate = new Date(selectedDateStr + "T00:00:00")
 
-  // Si no existe el día, lo dejamos como null - se creará al hacer la primera entrada
+  // No permitir fechas futuras
+  if (selectedDate > today) {
+    redirect("/app")
+  }
+
+  const isToday = selectedDateStr === todayStr
+
+  // Obtener el día seleccionado
+  const { data: day } = await supabase
+    .from("days")
+    .select("*")
+    .eq("user_id", data.user.id)
+    .eq("date", selectedDateStr)
+    .single()
+
   const dayId = day?.id || null
 
   // Obtener las cards del día si existe
@@ -47,11 +68,11 @@ export default async function AppPage() {
 
   return (
     <div className="min-h-svh bg-background">
-      <AppHeader userEmail={data.user.email || ""} />
+      <AppHeader userEmail={data.user.email || ""} selectedDate={selectedDate} />
       <main className="container mx-auto px-4 py-6 max-w-4xl">
         <div className="flex flex-col gap-6">
-          <JournalInput userId={data.user.id} dayId={dayId} todayDate={today} />
-          <CardsGrid cards={cards} dayId={dayId} />
+          {isToday && <JournalInput userId={data.user.id} dayId={dayId} todayDate={todayStr} />}
+          <CardsGrid cards={cards} dayId={dayId} isReadOnly={!isToday} selectedDate={selectedDateStr} />
         </div>
       </main>
     </div>
