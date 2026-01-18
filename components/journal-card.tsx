@@ -143,7 +143,7 @@ export function JournalCard({
   }
 
   const formattedDate = detectedDate
-    ? new Date(detectedDate).toLocaleDateString("es-ES", {
+    ? new Date(detectedDate + "T12:00:00").toLocaleDateString("es-ES", {
         weekday: "short",
         day: "numeric",
         month: "short",
