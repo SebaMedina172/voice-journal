@@ -1,7 +1,7 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import type React from "react"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -9,7 +9,7 @@ import { Calendar, CheckSquare, Heart, Activity, FileText, CalendarDays, Trash2,
 import type { CardType, CardColor, Mood } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 
 interface JournalCardProps {
   id: string
@@ -26,49 +26,21 @@ interface JournalCardProps {
 }
 
 const typeConfig: Record<CardType, { icon: typeof Heart; label: string }> = {
-  emotion: { icon: Heart, label: "Emoción" },
+  emotion: { icon: Heart, label: "Emocion" },
   activity: { icon: Activity, label: "Actividad" },
   task: { icon: CheckSquare, label: "Tarea" },
   event: { icon: Calendar, label: "Evento" },
   note: { icon: FileText, label: "Nota" },
 }
 
-const colorClasses: Record<CardColor, { bg: string; border: string; badge: string }> = {
-  amber: {
-    bg: "bg-amber-50 dark:bg-amber-950/30",
-    border: "border-amber-200 dark:border-amber-800",
-    badge: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
-  },
-  blue: {
-    bg: "bg-blue-50 dark:bg-blue-950/30",
-    border: "border-blue-200 dark:border-blue-800",
-    badge: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  },
-  green: {
-    bg: "bg-green-50 dark:bg-green-950/30",
-    border: "border-green-200 dark:border-green-800",
-    badge: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  },
-  purple: {
-    bg: "bg-purple-50 dark:bg-purple-950/30",
-    border: "border-purple-200 dark:border-purple-800",
-    badge: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-  },
-  gray: {
-    bg: "bg-gray-50 dark:bg-gray-950/30",
-    border: "border-gray-200 dark:border-gray-800",
-    badge: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
-  },
-  rose: {
-    bg: "bg-rose-50 dark:bg-rose-950/30",
-    border: "border-rose-200 dark:border-rose-800",
-    badge: "bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200",
-  },
-  indigo: {
-    bg: "bg-indigo-50 dark:bg-indigo-950/30",
-    border: "border-indigo-200 dark:border-indigo-800",
-    badge: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
-  },
+const postitColors: Record<CardColor, { bg: string; pin: string }> = {
+  amber: { bg: "bg-postit-cream", pin: "bg-pin-yellow" },
+  blue: { bg: "bg-postit-blue", pin: "bg-pin-blue" },
+  green: { bg: "bg-postit-green", pin: "bg-pin-green" },
+  purple: { bg: "bg-postit-lavender", pin: "bg-pin-blue" },
+  gray: { bg: "bg-postit-cream", pin: "bg-pin-red" },
+  rose: { bg: "bg-postit-pink", pin: "bg-pin-red" },
+  indigo: { bg: "bg-postit-blue", pin: "bg-pin-blue" },
 }
 
 const moodLabels: Record<Mood, string> = {
@@ -101,27 +73,37 @@ export function JournalCard({
   const [editTitle, setEditTitle] = useState(title)
   const [editContent, setEditContent] = useState(content)
   const [isSaving, setIsSaving] = useState(false)
+  const [isExiting, setIsExiting] = useState(false)
 
   const { icon: Icon, label } = typeConfig[type]
-  const colorClass = colorClasses[color]
+  const postitStyle = postitColors[color]
+
+  const rotation = useMemo(() => {
+    const seed = id.charCodeAt(0) + id.charCodeAt(id.length - 1)
+    return ((seed % 5) - 2) * 0.8
+  }, [id])
 
   const handleDelete = async () => {
     if (isDeleting || isReadOnly) return
-    setIsDeleting(true)
+    setIsExiting(true)
 
-    try {
-      const response = await fetch(`/api/cards/${id}`, {
-        method: "DELETE",
-      })
-
-      if (response.ok) {
-        router.refresh()
+    // Wait for animation then delete
+    setTimeout(async () => {
+      setIsDeleting(true)
+      try {
+        const response = await fetch(`/api/cards/${id}`, {
+          method: "DELETE",
+        })
+        if (response.ok) {
+          router.refresh()
+        }
+      } catch (error) {
+        console.error("Error deleting card:", error)
+        setIsExiting(false)
+      } finally {
+        setIsDeleting(false)
       }
-    } catch (error) {
-      console.error("Error deleting card:", error)
-    } finally {
-      setIsDeleting(false)
-    }
+    }, 300)
   }
 
   const handleEdit = () => {
@@ -169,117 +151,136 @@ export function JournalCard({
     : null
 
   return (
-    <Card className={cn("transition-all hover:shadow-md", colorClass.bg, colorClass.border)}>
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Icon className="h-4 w-4 text-muted-foreground" />
-            <Badge variant="secondary" className={cn("text-xs font-normal", colorClass.badge)}>
-              {label}
-            </Badge>
-            {mood && (
-              <Badge variant="outline" className="text-xs font-normal">
-                {moodLabels[mood]}
-              </Badge>
-            )}
-          </div>
-          {!isReadOnly && (
-            <div className="flex items-center gap-1">
-              {isEditing ? (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                    onClick={handleCancelEdit}
-                    disabled={isSaving}
-                  >
-                    <X className="h-3.5 w-3.5" />
-                    <span className="sr-only">Cancelar</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-green-600"
-                    onClick={handleSaveEdit}
-                    disabled={isSaving || !editTitle.trim() || !editContent.trim()}
-                  >
-                    <Check className="h-3.5 w-3.5" />
-                    <span className="sr-only">Guardar</span>
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                    onClick={handleEdit}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                    <span className="sr-only">Editar</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    <span className="sr-only">Eliminar</span>
-                  </Button>
-                </>
-              )}
-            </div>
+    <div
+      className={cn("postit relative rounded-sm p-4 pt-6", postitStyle.bg, isExiting && "postit-exit")}
+      style={
+        {
+          "--rotation": `${rotation}deg`,
+          transform: `rotate(${rotation}deg)`,
+        } as React.CSSProperties
+      }
+    >
+      {/* Pin decoration */}
+      <div className={cn("pin", postitStyle.pin)} />
+
+      {/* Header with type icon and actions */}
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-foreground/60" />
+          <span className="text-xs font-medium text-foreground/70 uppercase tracking-wide">{label}</span>
+          {mood && (
+            <span className="text-xs text-foreground/50 border-l border-foreground/20 pl-2 ml-1">
+              {moodLabels[mood]}
+            </span>
           )}
         </div>
-        {isEditing ? (
-          <Input
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            className="text-base font-semibold bg-background/50"
-            placeholder="Título"
-          />
-        ) : (
-          <CardTitle className="text-base leading-tight">{title}</CardTitle>
-        )}
-      </CardHeader>
-      <CardContent className="pt-0">
-        {isEditing ? (
-          <Textarea
-            value={editContent}
-            onChange={(e) => setEditContent(e.target.value)}
-            className="text-sm bg-background/50 min-h-[80px] resize-none"
-            placeholder="Contenido"
-          />
-        ) : (
-          <p className="text-sm text-muted-foreground leading-relaxed">{content}</p>
-        )}
-
-        {!isEditing && (detectedDate || hasCalendarAction || hasTaskAction) && (
-          <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border/50">
-            {detectedDate && (
-              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                <CalendarDays className="h-3 w-3" />
-                {formattedDate}
-              </span>
-            )}
-            {!isReadOnly && hasCalendarAction && (
-              <Button variant="outline" size="sm" className="h-7 text-xs gap-1 bg-transparent">
-                <Calendar className="h-3 w-3" />
-                Agendar
-              </Button>
-            )}
-            {!isReadOnly && hasTaskAction && (
-              <Button variant="outline" size="sm" className="h-7 text-xs gap-1 bg-transparent">
-                <CheckSquare className="h-3 w-3" />
-                Crear tarea
-              </Button>
+        {!isReadOnly && (
+          <div className="flex items-center gap-0.5">
+            {isEditing ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-foreground/50 hover:text-foreground hover:bg-foreground/10"
+                  onClick={handleCancelEdit}
+                  disabled={isSaving}
+                >
+                  <X className="h-3.5 w-3.5" />
+                  <span className="sr-only">Cancelar</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-foreground/50 hover:text-green-700 hover:bg-green-100/50"
+                  onClick={handleSaveEdit}
+                  disabled={isSaving || !editTitle.trim() || !editContent.trim()}
+                >
+                  <Check className="h-3.5 w-3.5" />
+                  <span className="sr-only">Guardar</span>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-foreground/50 hover:text-foreground hover:bg-foreground/10"
+                  onClick={handleEdit}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  <span className="sr-only">Editar</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-foreground/50 hover:text-red-600 hover:bg-red-100/50"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span className="sr-only">Eliminar</span>
+                </Button>
+              </>
             )}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Title */}
+      {isEditing ? (
+        <Input
+          value={editTitle}
+          onChange={(e) => setEditTitle(e.target.value)}
+          className="text-base font-semibold bg-white/50 border-foreground/20 mb-2"
+          placeholder="Titulo"
+        />
+      ) : (
+        <h3 className="text-base font-semibold text-foreground leading-tight mb-2">{title}</h3>
+      )}
+
+      {/* Content */}
+      {isEditing ? (
+        <Textarea
+          value={editContent}
+          onChange={(e) => setEditContent(e.target.value)}
+          className="text-sm bg-white/50 border-foreground/20 min-h-[60px] resize-none"
+          placeholder="Contenido"
+        />
+      ) : (
+        <p className="text-sm text-foreground/70 leading-relaxed">{content}</p>
+      )}
+
+      {/* Footer with date and actions */}
+      {!isEditing && (detectedDate || hasCalendarAction || hasTaskAction) && (
+        <div className="flex flex-wrap items-center gap-2 mt-3 pt-2 border-t border-foreground/10">
+          {detectedDate && (
+            <span className="inline-flex items-center gap-1 text-xs text-foreground/50">
+              <CalendarDays className="h-3 w-3" />
+              {formattedDate}
+            </span>
+          )}
+          {!isReadOnly && hasCalendarAction && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 text-xs gap-1 text-foreground/60 hover:text-foreground hover:bg-foreground/10 px-2"
+            >
+              <Calendar className="h-3 w-3" />
+              Agendar
+            </Button>
+          )}
+          {!isReadOnly && hasTaskAction && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 text-xs gap-1 text-foreground/60 hover:text-foreground hover:bg-foreground/10 px-2"
+            >
+              <CheckSquare className="h-3 w-3" />
+              Crear tarea
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
