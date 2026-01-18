@@ -74,9 +74,9 @@ export function CardsGrid({ cards, dayId, isReadOnly = false, selectedDate }: Ca
           <span>Estas viendo un dia pasado. Las entradas son de solo lectura.</span>
         </div>
       )}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="columns-1 sm:columns-2 lg:columns-3 gap-5 space-y-5">
         {cards.map((card, index) => (
-          <div key={card.id} className="postit-enter" style={{ animationDelay: `${index * 0.05}s` }}>
+          <div key={card.id} className="postit-enter break-inside-avoid" style={{ animationDelay: `${index * 0.05}s` }}>
             <JournalCard
               id={card.id}
               type={card.type as CardType}
