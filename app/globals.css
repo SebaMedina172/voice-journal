@@ -1,81 +1,85 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
+/* New warm cork board color palette */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  /* Cork board warm background */
+  --background: oklch(0.87 0.04 70);
+  --foreground: oklch(0.25 0.03 50);
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* Card/Post-it base */
+  --card: oklch(0.96 0.03 95);
+  --card-foreground: oklch(0.25 0.03 50);
+
+  /* Popover */
+  --popover: oklch(0.98 0.01 90);
+  --popover-foreground: oklch(0.25 0.03 50);
+
+  /* Primary - warm brown */
+  --primary: oklch(0.45 0.08 55);
+  --primary-foreground: oklch(0.98 0.01 90);
+
+  /* Secondary - soft cream */
+  --secondary: oklch(0.92 0.03 85);
+  --secondary-foreground: oklch(0.3 0.04 50);
+
+  /* Muted */
+  --muted: oklch(0.88 0.03 75);
+  --muted-foreground: oklch(0.45 0.03 50);
+
+  /* Accent - coral red for mic button */
+  --accent: oklch(0.65 0.2 25);
+  --accent-foreground: oklch(0.98 0.01 90);
+
+  /* Destructive */
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0.01 90);
+
+  /* Borders & inputs */
+  --border: oklch(0.78 0.04 65);
+  --input: oklch(0.92 0.02 80);
+  --ring: oklch(0.55 0.1 55);
+
+  /* Post-it colors - muted pastels */
+  --postit-cream: oklch(0.96 0.04 95);
+  --postit-pink: oklch(0.92 0.06 10);
+  --postit-green: oklch(0.9 0.06 145);
+  --postit-blue: oklch(0.9 0.05 240);
+  --postit-lavender: oklch(0.9 0.06 300);
+  --postit-peach: oklch(0.92 0.06 55);
+
+  /* Pin colors */
+  --pin-red: oklch(0.55 0.22 25);
+  --pin-blue: oklch(0.5 0.15 250);
+  --pin-green: oklch(0.55 0.15 145);
+  --pin-yellow: oklch(0.8 0.15 90);
+
+  /* Charts */
+  --chart-1: oklch(0.65 0.2 25);
+  --chart-2: oklch(0.6 0.12 145);
+  --chart-3: oklch(0.55 0.12 250);
+  --chart-4: oklch(0.75 0.15 90);
+  --chart-5: oklch(0.6 0.12 300);
+
+  --radius: 0.5rem;
+
+  /* Sidebar */
+  --sidebar: oklch(0.85 0.04 70);
+  --sidebar-foreground: oklch(0.25 0.03 50);
+  --sidebar-primary: oklch(0.45 0.08 55);
+  --sidebar-primary-foreground: oklch(0.98 0.01 90);
+  --sidebar-accent: oklch(0.88 0.04 75);
+  --sidebar-accent-foreground: oklch(0.3 0.04 50);
+  --sidebar-border: oklch(0.78 0.04 65);
+  --sidebar-ring: oklch(0.55 0.1 55);
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -112,6 +116,20 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Post-it colors as theme tokens */
+  --color-postit-cream: var(--postit-cream);
+  --color-postit-pink: var(--postit-pink);
+  --color-postit-green: var(--postit-green);
+  --color-postit-blue: var(--postit-blue);
+  --color-postit-lavender: var(--postit-lavender);
+  --color-postit-peach: var(--postit-peach);
+
+  /* Pin colors */
+  --color-pin-red: var(--pin-red);
+  --color-pin-blue: var(--pin-blue);
+  --color-pin-green: var(--pin-green);
+  --color-pin-yellow: var(--pin-yellow);
 }
 
 @layer base {
@@ -121,4 +139,120 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Improved cork board texture with more realistic pattern */
+.cork-texture {
+  background-color: var(--background);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.9' numOctaves='2' result='noise'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='noise' scale='2' xChannelSelector='R' yChannelSelector='G'/%3E%3C/filter%3E%3Ccircle cx='20' cy='30' r='3' fill='%23c4956a' opacity='0.3'/%3E%3Ccircle cx='70' cy='60' r='2' fill='%23b8845c' opacity='0.25'/%3E%3Ccircle cx='45' cy='80' r='2.5' fill='%23d4a574' opacity='0.2'/%3E%3Ccircle cx='85' cy='20' r='1.5' fill='%23c9a072' opacity='0.3'/%3E%3C/svg%3E");
+  background-size: 200px 200px, 100px 100px;
+}
+
+/* Post-it note styles */
+.postit {
+  position: relative;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.postit:hover {
+  transform: translateY(-2px) rotate(0deg) !important;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Pin/thumbtack decoration */
+.pin {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  z-index: 10;
+}
+
+.pin::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+}
+
+/* Microphone button pulse animation */
+@keyframes mic-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--accent);
+  }
+  50% {
+    box-shadow: 0 0 0 12px transparent;
+  }
+}
+
+.mic-recording {
+  animation: mic-pulse 1.5s ease-in-out infinite;
+}
+
+/* Card entry animation */
+@keyframes postit-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotate(-5deg) translateY(-20px);
+  }
+  60% {
+    transform: scale(1.02) rotate(1deg) translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(var(--rotation, 0deg)) translateY(0);
+  }
+}
+
+.postit-enter {
+  animation: postit-appear 0.4s ease-out forwards;
+}
+
+/* Card exit animation */
+@keyframes postit-exit {
+  0% {
+    opacity: 1;
+    transform: scale(1) rotate(var(--rotation, 0deg));
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8) rotate(15deg) translateY(30px);
+  }
+}
+
+.postit-exit {
+  animation: postit-exit 0.3s ease-in forwards;
+}
+
+/* Voice wave animation - contained inside button */
+@keyframes voice-wave {
+  0%,
+  100% {
+    height: 8px;
+  }
+  50% {
+    height: 20px;
+  }
+}
+
+.voice-wave-bar {
+  animation: voice-wave 0.5s ease-in-out infinite;
+  min-height: 8px;
+}
+
+/* Safe area for mobile devices */
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
