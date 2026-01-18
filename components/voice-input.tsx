@@ -104,8 +104,10 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
               onBlur={() => !currentVoiceDisplay && !isListening && setIsEditingText(false)}
               readOnly={isListening}
               className={cn(
-                "resize-none bg-card border-border text-foreground placeholder:text-foreground/40 pr-8",
-                "min-h-16 max-h-32 md:min-h-20 md:max-h-40 text-sm",
+                "resize-none bg-card border-border text-foreground placeholder:text-foreground/40",
+                "pl-3 pr-5 py-2.5",
+                "min-h-16 max-h-32 md:min-h-20 md:max-h-40 text-sm scroll-smooth",
+                "custom-scrollbar",
                 isListening && "cursor-default"
               )}
               disabled={isLoading}
@@ -115,7 +117,7 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute top-1 right-1 h-6 w-6 text-foreground/40 hover:text-foreground"
+                className="absolute top-2 right-2 h-5 w-5 text-foreground/30 hover:text-foreground hover:bg-foreground/5 rounded-full"
                 onClick={() => {
                   reset()
                   setIsEditingText(false)

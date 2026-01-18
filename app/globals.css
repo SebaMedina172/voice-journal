@@ -256,3 +256,39 @@
 .safe-area-inset-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* Custom scrollbar styles for desktop */
+@layer base {
+  /* Scrollbar width */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  /* Track background */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Scrollbar thumb (draggable part) */
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+
+  /* Thumb color on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+  }
+
+  /* Firefox support */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+}
+
+/* Utility to hide scrollbar buttons*/
+.hide-scrollbar-buttons::-webkit-scrollbar-button {
+  display: none;
+}
