@@ -1,12 +1,10 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
+import { useRef, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Loader2, Send, Mic, MicOff, Keyboard, X } from "lucide-react"
+import { Loader2, Send, Mic, Keyboard, X } from "lucide-react"
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition"
 import { cn } from "@/lib/utils"
 
@@ -17,10 +15,10 @@ interface VoiceInputProps {
 }
 
 export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
-  const [text, setText] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isEditingText, setIsEditingText] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
 
   const {
@@ -31,22 +29,28 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
     start,
     stop,
     reset,
+    setText,
   } = useSpeechRecognition({ lang: "es-ES" })
 
-  useEffect(() => {
-    if (voiceText) {
-      setText((prev) => (prev ? prev + " " + voiceText : voiceText))
-      reset()
-    }
-  }, [voiceText, reset])
+  const currentVoiceDisplay = isListening 
+    ? (voiceText || "") + (interimText ? (voiceText ? " " : "") + interimText : "")
+    : voiceText
+
+    useEffect(() => {
+      if (textareaRef.current) {
+        const textarea = textareaRef.current
+        textarea.scrollTop = textarea.scrollHeight
+      }
+    }, [currentVoiceDisplay])
+
+  const hasContent = currentVoiceDisplay.trim().length > 0
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault()
-    if (!text.trim() || isLoading) return
+    const submitText = voiceText.trim()
+    if (!submitText || isLoading) return
 
-    if (isListening) {
-      stop()
-    }
+    if (isListening) stop()
 
     setIsLoading(true)
     setError(null)
@@ -56,7 +60,7 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: text.trim(),
+          text: submitText,
           userId,
           dayId,
           todayDate,
@@ -68,7 +72,7 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
         throw new Error(data.error || "Error al procesar")
       }
 
-      setText("")
+      reset()
       setIsEditingText(false)
       router.refresh()
     } catch (err) {
@@ -86,21 +90,18 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
     }
   }
 
-  // Mostrar el texto actual + lo que se está dictando en tiempo real
-  const displayText = text + (interimText ? (text ? " " : "") + interimText : "")
-  const hasContent = displayText.trim().length > 0
-
   return (
     <div className="flex flex-col items-center gap-3 w-full">
       {(hasContent || isEditingText) && (
         <div className="w-full max-w-md">
           <div className="relative">
             <Textarea
+              ref={textareaRef}
               placeholder="Escribe o dicta lo que quieras registrar..."
-              value={isListening ? displayText : text}
-              onChange={(e) => !isListening && setText(e.target.value)}
+              value={currentVoiceDisplay}
+              onChange={(e) => setText(e.target.value)}
               onFocus={() => setIsEditingText(true)}
-              onBlur={() => !text && !isListening && setIsEditingText(false)}
+              onBlur={() => !currentVoiceDisplay && !isListening && setIsEditingText(false)}
               readOnly={isListening}
               className={cn(
                 "resize-none bg-card border-border text-foreground placeholder:text-foreground/40 pr-8",
@@ -109,14 +110,14 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
               )}
               disabled={isLoading}
             />
-            {text && !isLoading && !isListening && (
+            {currentVoiceDisplay && !isLoading && !isListening && (
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
                 className="absolute top-1 right-1 h-6 w-6 text-foreground/40 hover:text-foreground"
                 onClick={() => {
-                  setText("")
+                  reset()
                   setIsEditingText(false)
                 }}
               >
@@ -176,7 +177,7 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
         {hasContent && (
           <Button
             onClick={() => handleSubmit()}
-            disabled={isLoading || !text.trim()}
+            disabled={isLoading || !voiceText.trim()}
             size="icon"
             className="h-10 w-10 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
           >

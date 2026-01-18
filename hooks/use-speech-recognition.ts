@@ -3,8 +3,6 @@ import { useState, useEffect, useCallback, useRef } from "react"
 
 interface UseSpeechRecognitionOptions {
   lang?: string
-  continuous?: boolean
-  interimResults?: boolean
 }
 
 interface UseSpeechRecognitionReturn {
@@ -15,20 +13,26 @@ interface UseSpeechRecognitionReturn {
   start: () => void
   stop: () => void
   reset: () => void
+  setText: (text: string) => void 
 }
 
 export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}): UseSpeechRecognitionReturn {
-  const { lang = "es-ES", continuous = true, interimResults = true } = options
+  const { lang = "es-ES" } = options
   
-  const [text, setText] = useState("")
+  const [text, setTextState] = useState("")
   const [interimText, setInterimText] = useState("")
   const [isListening, setIsListening] = useState(false)
   const [isSupported, setIsSupported] = useState(false)
   
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const isListeningRef = useRef(isListening)
+  const accumulatedTextRef = useRef("") 
 
-  // Mantener la referencia actualizada
+  const handleSetText = useCallback((newText: string) => {
+    setTextState(newText)
+    accumulatedTextRef.current = newText
+  }, [])
+
   useEffect(() => {
     isListeningRef.current = isListening
   }, [isListening])
@@ -42,31 +46,39 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}):
         const recognition = new SpeechRecognitionAPI()
         
         recognition.lang = lang
-        recognition.continuous = continuous
-        recognition.interimResults = interimResults
+        recognition.continuous = false 
+        recognition.interimResults = true
 
-        recognition.onresult = (event) => {
-          let finalTranscript = ""
-          let interimTranscript = ""
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
+          let newFinalText = ""
+          let currentInterim = ""
 
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript
-            if (event.results[i].isFinal) {
-              finalTranscript += transcript
+          for (let i = 0; i < event.results.length; i++) {
+            const result = event.results[i]
+            const transcript = result[0].transcript
+            
+            if (result.isFinal) {
+              newFinalText += transcript
             } else {
-              interimTranscript += transcript
+              currentInterim += transcript
             }
           }
 
-          if (finalTranscript) {
-            setText((prev) => prev + finalTranscript)
+          if (newFinalText) {
+            const prevText = accumulatedTextRef.current
+
+            const separator = prevText && !prevText.endsWith(" ") ? " " : ""
+            const finalTextCombined = prevText + separator + newFinalText
+            
+            accumulatedTextRef.current = finalTextCombined
+            setTextState(finalTextCombined)
             setInterimText("")
           } else {
-            setInterimText(interimTranscript)
+            setInterimText(currentInterim)
           }
         }
 
-        recognition.onerror = (event) => {
+        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
           if (event.error !== "no-speech" && event.error !== "aborted") {
             setIsListening(false)
           }
@@ -81,6 +93,7 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}):
             }
           } else {
             setIsListening(false)
+            setInterimText("")
           }
         }
 
@@ -93,19 +106,20 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}):
         recognitionRef.current.abort()
       }
     }
-  }, [lang, continuous, interimResults])
+  }, [lang])
 
   const start = useCallback(() => {
     if (recognitionRef.current && !isListening) {
       try {
-        setText("")
-        setInterimText("")
+        accumulatedTextRef.current = text 
+        
         recognitionRef.current.start()
         setIsListening(true)
       } catch (e) {
+        console.error(e)
       }
     }
-  }, [isListening])
+  }, [isListening, text])
 
   const stop = useCallback(() => {
     if (recognitionRef.current && isListening) {
@@ -116,7 +130,8 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}):
   }, [isListening])
 
   const reset = useCallback(() => {
-    setText("")
+    accumulatedTextRef.current = ""
+    setTextState("")
     setInterimText("")
   }, [])
 
@@ -128,5 +143,6 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}):
     start,
     stop,
     reset,
+    setText: handleSetText,
   }
 }
