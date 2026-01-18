@@ -252,32 +252,38 @@ export function JournalCard({
 
       {/* Footer with date and actions */}
       {!isEditing && (detectedDate || hasCalendarAction || hasTaskAction) && (
-        <div className="flex flex-wrap items-center gap-2 mt-3 pt-2 border-t border-foreground/10">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 pt-2 border-t border-foreground/10">
           {detectedDate && (
             <span className="inline-flex items-center gap-1 text-xs text-foreground/50">
               <CalendarDays className="h-3 w-3" />
               {formattedDate}
             </span>
           )}
-          {!isReadOnly && hasCalendarAction && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 text-xs gap-1 text-foreground/60 hover:text-foreground hover:bg-foreground/10 px-2"
-            >
-              <Calendar className="h-3 w-3" />
-              Agendar
-            </Button>
-          )}
-          {!isReadOnly && hasTaskAction && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 text-xs gap-1 text-foreground/60 hover:text-foreground hover:bg-foreground/10 px-2"
-            >
-              <CheckSquare className="h-3 w-3" />
-              Crear tarea
-            </Button>
+          {!isReadOnly && (hasCalendarAction || hasTaskAction) && (
+            <div className="flex items-center gap-1 ml-auto">
+              {hasCalendarAction && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-foreground/60 hover:text-foreground hover:bg-foreground/10"
+                  title="Agendar en calendario"
+                >
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span className="sr-only">Agendar</span>
+                </Button>
+              )}
+              {hasTaskAction && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-foreground/60 hover:text-foreground hover:bg-foreground/10"
+                  title="Crear tarea"
+                >
+                  <CheckSquare className="h-3.5 w-3.5" />
+                  <span className="sr-only">Crear tarea</span>
+                </Button>
+              )}
+            </div>
           )}
         </div>
       )}

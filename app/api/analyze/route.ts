@@ -59,8 +59,12 @@ COLORS by type:
 - event: indigo
 - note: gray
 
-MOODS (only for emotion):
-- happy, sad, stressed, calm, excited, anxious, grateful, frustrated, neutral
+MOODS - CRITICAL RULES:
+========================================
+ONLY use mood for cards with type="emotion"
+For ALL other types (activity, task, event, note), mood MUST be null
+Valid mood values ONLY: happy, sad, stressed, calm, excited, anxious, grateful, frustrated, neutral
+========================================
 
 Respond ONLY with valid JSON in this exact format:
 {
@@ -153,6 +157,8 @@ IMPORTANT - DO NOT MAKE DATE CALCULATION ERRORS:
 - Use double quotes, not single
 - ALWAYS respond in the user's input language
 - BE VERY CAREFUL with date calculations - triple check your math!
+- CRITICAL: mood MUST be null for all cards except type="emotion"
+- CRITICAL: mood values MUST be exactly one of: happy, sad, stressed, calm, excited, anxious, grateful, frustrated, neutral
 
 TODAY'S COMPLETE CONTEXT FOR DATE CALCULATIONS:
 ========================================
@@ -221,7 +227,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       model: "llama-3.3-70b-versatile",
-      temperature: 0.4,
+      temperature: 0.3,
       max_tokens: 2000,
     })
 
@@ -292,19 +298,33 @@ export async function POST(request: NextRequest) {
 
     // Crear las cards
     if (parsedResponse.cards && parsedResponse.cards.length > 0) {
-      const cardsToInsert = parsedResponse.cards.map((card, index) => ({
-        entry_id: entry.id,
-        day_id: currentDayId,
-        type: card.type,
-        title: card.title,
-        content: card.content,
-        color: card.color,
-        mood: card.mood || null,
-        detected_date: card.detectedDate || null,
-        has_calendar_action: card.hasCalendarAction || false,
-        has_task_action: card.hasTaskAction || false,
-        position: index,
-      }))
+      const cardsToInsert = parsedResponse.cards.map((card, index) => {
+        // Validar que mood solo esté presente en cards de tipo emotion
+        const validatedMood = card.type === 'emotion' ? card.mood : null
+        
+        // Validar que el mood sea uno de los valores permitidos
+        const allowedMoods = ['happy', 'sad', 'stressed', 'calm', 'excited', 'anxious', 'grateful', 'frustrated', 'neutral']
+        const finalMood = validatedMood && allowedMoods.includes(validatedMood) ? validatedMood : null
+        
+        return {
+          entry_id: entry.id,
+          day_id: currentDayId,
+          type: card.type,
+          title: card.title,
+          content: card.content,
+          color: card.color,
+          mood: finalMood,
+          detected_date: card.detectedDate || null,
+          has_calendar_action: card.hasCalendarAction || false,
+          has_task_action: card.hasTaskAction || false,
+          position: index,
+        }
+      })
+
+      // AGREGA ESTOS LOGS
+      console.log("=== INTENTANDO INSERTAR CARDS ===")
+      console.log("Respuesta de la IA:", JSON.stringify(parsedResponse, null, 2))
+      console.log("Cards procesadas para insertar:", JSON.stringify(cardsToInsert, null, 2))
 
       const { error: cardsError } = await supabase.from("cards").insert(cardsToInsert)
 
