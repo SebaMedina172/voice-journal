@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { VoiceInput } from "@/components/voice-input"
 import { CardsGrid } from "@/components/cards-grid"
 import { AppHeader } from "@/components/app-header"
+import { getTodayLocal, formatLocalDate, parseLocalDate } from "@/lib/date-utils"
 
 interface PageProps {
   searchParams: Promise<{ date?: string }>
@@ -17,12 +18,13 @@ export default async function AppPage({ searchParams }: PageProps) {
     redirect("/auth/login")
   }
 
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const todayStr = today.toISOString().split("T")[0]
+  // Get today in LOCAL timezone (not UTC)
+  const today = getTodayLocal()
+  const todayStr = formatLocalDate(today)
 
+  // Parse selected date in LOCAL timezone
   const selectedDateStr = params.date || todayStr
-  const selectedDate = new Date(selectedDateStr + "T00:00:00")
+  const selectedDate = parseLocalDate(selectedDateStr)
 
   // No permitir fechas futuras
   if (selectedDate > today) {
