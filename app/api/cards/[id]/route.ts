@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { formatLocalDate, getTodayLocal } from "@/lib/date-utils"
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -35,8 +36,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: "No autorizado" }, { status: 403 })
     }
 
-    // Verificar que es el día actual
-    const today = new Date().toLocaleDateString('en-CA') // Formato YYYY-MM-DD
+    const today = formatLocalDate(getTodayLocal())
     if (dayData.date !== today) {
       return NextResponse.json({ error: "Solo puedes editar cards del día actual" }, { status: 403 })
     }

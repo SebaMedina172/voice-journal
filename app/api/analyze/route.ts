@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Groq from "groq-sdk"
 import { createClient } from "@/lib/supabase/server"
+import { formatLocalDate } from "@/lib/date-utils"
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -14,7 +15,7 @@ function getTodayInfo() {
   }
 
   return {
-    date: today.toISOString().split("T")[0],
+    date: formatLocalDate(today),
     dayEn: dayNames.en,
     dayEs: dayNames.es,
     fullEn: today.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }),
@@ -320,11 +321,6 @@ export async function POST(request: NextRequest) {
           position: index,
         }
       })
-
-      // AGREGA ESTOS LOGS
-      console.log("=== INTENTANDO INSERTAR CARDS ===")
-      console.log("Respuesta de la IA:", JSON.stringify(parsedResponse, null, 2))
-      console.log("Cards procesadas para insertar:", JSON.stringify(cardsToInsert, null, 2))
 
       const { error: cardsError } = await supabase.from("cards").insert(cardsToInsert)
 
