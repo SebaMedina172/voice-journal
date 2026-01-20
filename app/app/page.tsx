@@ -71,15 +71,15 @@ export default async function AppPage({ searchParams }: PageProps) {
       <AppHeader userEmail={data.user.email || ""} selectedDate={selectedDate} />
 
       {/* Main content area - scrollable cards */}
-      <main className="flex-1 overflow-auto pb-32 md:pb-6">
-        <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <main className="flex-1 overflow-y-auto pb-32 md:pb-6">
+        <div className="container mx-auto px-2 sm:px-3 md:px-4 py-4 sm:py-6 max-w-6xl w-full">
           {/* Desktop: Two column layout */}
-          <div className="hidden md:grid md:grid-cols-[320px_1fr] md:gap-8">
+          <div className="hidden md:grid md:grid-cols-[300px_1fr] lg:grid-cols-[320px_1fr] md:gap-6 lg:gap-8">
             {/* Left column: Voice input (desktop) */}
             {isToday && (
-              <div className="sticky top-24 h-fit">
-                <div className="bg-card/90 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-border">
-                  <h2 className="text-sm font-medium text-foreground/70 mb-4 text-center uppercase tracking-wide">
+              <div className="sticky top-20 h-fit">
+                <div className="bg-card/90 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-sm border border-border">
+                  <h2 className="text-xs sm:text-sm font-medium text-foreground/70 mb-4 text-center uppercase tracking-wide">
                     Nueva entrada
                   </h2>
                   <VoiceInput userId={data.user.id} dayId={dayId} todayDate={todayStr} />
@@ -100,10 +100,10 @@ export default async function AppPage({ searchParams }: PageProps) {
         </div>
       </main>
 
-      {/* Mobile: Fixed bottom voice input */}
+      {/* Mobile */}
       {isToday && (
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-secondary/95 backdrop-blur-md border-t border-border safe-area-inset-bottom">
-          <div className="container mx-auto px-4 py-3">
+          <div className="container mx-auto px-2 sm:px-3 py-3 max-w-6xl">
             <VoiceInput userId={data.user.id} dayId={dayId} todayDate={todayStr} />
           </div>
         </div>
