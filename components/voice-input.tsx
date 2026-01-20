@@ -91,9 +91,9 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 w-full">
+    <div className="flex flex-col items-center gap-2 sm:gap-3 w-full">
       {(hasContent || isEditingText) && (
-        <div className="w-full max-w-md">
+        <div className="w-full">
           <div className="relative">
             <Textarea
               ref={textareaRef}
@@ -105,8 +105,8 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
               readOnly={isListening}
               className={cn(
                 "resize-none bg-card border-border text-foreground placeholder:text-foreground/40",
-                "pl-3 pr-5 py-2.5",
-                "min-h-16 max-h-32 md:min-h-20 md:max-h-40 text-sm scroll-smooth",
+                "pl-3 pr-5 py-2",
+                "min-h-16 max-h-32 sm:max-h-40 text-sm scroll-smooth",
                 "custom-scrollbar",
                 isListening && "cursor-default"
               )}
@@ -117,7 +117,7 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute top-2 right-2 h-5 w-5 text-foreground/30 hover:text-foreground hover:bg-foreground/5 rounded-full"
+                className="absolute top-1 right-1 h-5 w-5 text-foreground/30 hover:text-foreground hover:bg-foreground/5 rounded-full"
                 onClick={() => {
                   reset()
                   setIsEditingText(false)
@@ -130,16 +130,16 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
         </div>
       )}
 
-      <div className="flex items-center justify-center gap-3">
+      <div className="flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto">
         {/* Keyboard toggle - only show when no content */}
         {!hasContent && !isEditingText && (
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsEditingText(true)}
-            className="h-10 w-10 text-foreground/60 hover:text-foreground"
+            className="h-9 w-9 sm:h-10 sm:w-10 text-foreground/60 hover:text-foreground flex-shrink-0"
           >
-            <Keyboard className="h-5 w-5" />
+            <Keyboard className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         )}
 
@@ -150,7 +150,7 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
             onClick={toggleVoice}
             disabled={isLoading}
             className={cn(
-              "relative w-14 h-14 rounded-full flex items-center justify-center transition-all overflow-hidden",
+              "relative w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all overflow-hidden flex-shrink-0",
               "bg-accent text-accent-foreground shadow-lg hover:shadow-xl",
               "hover:scale-105 active:scale-95",
               isListening && "mic-recording bg-destructive",
@@ -163,7 +163,7 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
                 {[...Array(5)].map((_, i) => (
                   <div
                     key={i}
-                    className="w-1 bg-white/80 rounded-full voice-wave-bar"
+                    className="w-0.5 sm:w-1 bg-white/80 rounded-full voice-wave-bar"
                     style={{
                       animationDelay: `${i * 0.1}s`,
                     }}
@@ -171,7 +171,7 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
                 ))}
               </div>
             )}
-            {!isListening && <Mic className="h-6 w-6" />}
+            {!isListening && <Mic className="h-5 w-5 sm:h-6 sm:w-6" />}
           </button>
         )}
 
@@ -181,9 +181,9 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
             onClick={() => handleSubmit()}
             disabled={isLoading || !voiceText.trim()}
             size="icon"
-            className="h-10 w-10 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
+            className="h-9 w-9 sm:h-10 sm:w-10 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full flex-shrink-0"
           >
-            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+            {isLoading ? <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" /> : <Send className="h-4 w-4 sm:h-5 sm:w-5" />}
           </Button>
         )}
       </div>
