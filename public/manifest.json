@@ -1,0 +1,42 @@
+{
+  "name": "Daily Voice Journal",
+  "short_name": "Voice Journal",
+  "description": "Tu diario personal potenciado con IA para organizar tu día",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F3E8",
+  "theme_color": "#E87461",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "es",
+  "categories": ["lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/maskable_icon_x192_test.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/maskable_icon_x512_test.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Nueva entrada",
+      "short_name": "Nueva",
+      "description": "Crear una nueva entrada de diario",
+      "url": "/app",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
