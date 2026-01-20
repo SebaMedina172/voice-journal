@@ -67,14 +67,14 @@ export function CardsGrid({ cards, dayId, isReadOnly = false, selectedDate }: Ca
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3 sm:gap-4">
       {isReadOnly && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary text-sm text-foreground/70">
-          <History className="h-4 w-4" />
+        <div className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg bg-secondary text-xs sm:text-sm text-foreground/70 flex-wrap">
+          <History className="h-4 w-4 flex-shrink-0" />
           <span>Estas viendo un dia pasado. Las entradas son de solo lectura.</span>
         </div>
       )}
-      <div className="columns-1 sm:columns-2 lg:columns-3 gap-5 space-y-5">
+      <div className="columns-1 sm:columns-2 xl:columns-3 gap-3 sm:gap-4 md:gap-5 space-y-3 sm:space-y-4 md:space-y-5">
         {cards.map((card, index) => (
           <div key={card.id} className="postit-enter break-inside-avoid" style={{ animationDelay: `${index * 0.05}s` }}>
             <JournalCard
