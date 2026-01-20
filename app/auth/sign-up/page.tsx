@@ -55,18 +55,18 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <div className="flex min-h-svh w-full items-center justify-center px-4 py-6 sm:px-6 md:p-10">
       <div className="w-full max-w-sm">
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Crear cuenta</CardTitle>
-            <CardDescription>Comienza a organizar tu día con IA</CardDescription>
+            <CardTitle className="text-xl sm:text-2xl">Crear cuenta</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Comienza a organizar tu día con IA</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignUp}>
-              <div className="flex flex-col gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+              <div className="flex flex-col gap-3 sm:gap-4">
+                <div className="grid gap-1.5 sm:gap-2">
+                  <Label htmlFor="email" className="text-xs sm:text-sm">Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -74,34 +74,37 @@ export default function SignUpPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="text-sm"
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Contraseña</Label>
+                <div className="grid gap-1.5 sm:gap-2">
+                  <Label htmlFor="password" className="text-xs sm:text-sm">Contraseña</Label>
                   <Input
                     id="password"
                     type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    className="text-sm"
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="repeat-password">Repetir contraseña</Label>
+                <div className="grid gap-1.5 sm:gap-2">
+                  <Label htmlFor="repeat-password" className="text-xs sm:text-sm">Repetir contraseña</Label>
                   <Input
                     id="repeat-password"
                     type="password"
                     required
                     value={repeatPassword}
                     onChange={(e) => setRepeatPassword(e.target.value)}
+                    className="text-sm"
                   />
                 </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                {error && <p className="text-xs sm:text-sm text-destructive">{error}</p>}
+                <Button type="submit" className="w-full text-sm sm:text-base" disabled={isLoading}>
                   {isLoading ? "Creando cuenta..." : "Crear cuenta"}
                 </Button>
               </div>
-              <div className="mt-4 text-center text-sm">
+              <div className="mt-3 sm:mt-4 text-center text-xs sm:text-sm">
                 ¿Ya tienes cuenta?{" "}
                 <Link href="/auth/login" className="underline underline-offset-4">
                   Inicia sesión
