@@ -51,15 +51,13 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
 
   const goToPreviousDay = () => {
     if (isNavigating) return
-    const prevDay = new Date(selectedDate)
-    prevDay.setDate(prevDay.getDate() - 1)
+    const prevDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() - 1)
     navigateToDate(prevDay, "prev")
   }
 
   const goToNextDay = () => {
     if (isNavigating) return
-    const nextDay = new Date(selectedDate)
-    nextDay.setDate(nextDay.getDate() + 1)
+    const nextDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 1)
     if (nextDay <= today) {
       navigateToDate(nextDay, "next")
     }

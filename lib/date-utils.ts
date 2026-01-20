@@ -15,7 +15,12 @@ export function parseLocalDate(dateString: string): Date {
  */
 export function getTodayLocal(): Date {
   const now = new Date()
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  // Use local date components to get the correct date
+  const localYear = now.getFullYear()
+  const localMonth = now.getMonth()
+  const localDate = now.getDate()
+  
+  return new Date(localYear, localMonth, localDate)
 }
 
 /**
