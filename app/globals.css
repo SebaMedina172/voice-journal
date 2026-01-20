@@ -292,3 +292,143 @@
 .hide-scrollbar-buttons::-webkit-scrollbar-button {
   display: none;
 }
+
+/* ==================== RESPONSIVE IMPROVEMENTS ==================== */
+
+/* Ensure proper text sizing across devices */
+@media (max-width: 320px) {
+  html {
+    font-size: 14px;
+  }
+  
+  .postit {
+    min-width: 0;
+    word-break: break-word;
+  }
+}
+
+/* Mobile first approach for better responsive behavior */
+@media (max-width: 640px) {
+  /* Prevent overflow on small screens */
+  body, html {
+    overflow-x: hidden;
+  }
+  
+  .container {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Better spacing for small devices */
+  .postit {
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.06);
+  }
+  
+  /* Adjust animation for mobile */
+  @keyframes postit-appear {
+    0% {
+      opacity: 0;
+      transform: scale(0.9) translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) rotate(var(--rotation, 0deg)) translateY(0);
+    }
+  }
+  
+  /* Prevent horizontal overflow of cards */
+  [class*="columns-"] {
+    column-gap: 0.75rem;
+  }
+}
+
+/* Tablet optimization */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .postit {
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* Large screens optimization */
+@media (min-width: 1024px) {
+  .postit:hover {
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* Ensure proper stacking context */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Fix for mobile landscape orientation */
+@media (max-height: 600px) and (orientation: landscape) {
+  header {
+    padding: 0.5rem 0;
+  }
+  
+  main {
+    padding-bottom: 60px;
+  }
+  
+  .safe-area-inset-bottom {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    padding: 0.75rem 0;
+  }
+}
+
+/* Ensure touch targets are minimum 44px (accessibility) */
+@media (max-width: 768px) {
+  /* Only apply to primary interactive elements, exclude icon buttons */
+  button:not([class*="size-icon"]):not(.postit button),
+  [role="button"]:not([class*="size-icon"]), 
+  a[href]:not(.postit a), 
+  input:not(.postit input), 
+  textarea:not(.postit textarea), 
+  select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Ensure main interactive buttons have proper touch targets */
+  button[type="submit"],
+  button[type="button"]:not(.postit button) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Improve readability on very small screens */
+@media (max-width: 380px) {
+  .line-clamp-2 {
+    -webkit-line-clamp: 2;
+  }
+  
+  .line-clamp-4 {
+    -webkit-line-clamp: 3;
+  }
+}
+
+/* Prevent unnecessary animations on reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Ensure text is readable before web fonts load */
+@font-face {
+  font-family: 'Geist';
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  font-display: swap;
+}
