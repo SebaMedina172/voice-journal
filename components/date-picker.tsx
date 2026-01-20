@@ -76,8 +76,15 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
   const canGoNext = !isToday
 
   return (
-    <div className={cn("flex items-center gap-1", className)}>
-      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={goToPreviousDay} disabled={isNavigating}>
+    <div className={cn("inline-flex items-center gap-1", className)}>
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="h-8 w-8 flex-shrink-0" 
+        onClick={goToPreviousDay} 
+        disabled={isNavigating}
+        title="Día anterior"
+      >
         {isNavigating && navigatingDirection === "prev" ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
@@ -92,19 +99,21 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
             variant="ghost"
             disabled={isNavigating}
             className={cn(
-              "justify-start text-left font-normal h-8 px-2 gap-1.5",
+              "justify-center text-center font-normal h-8 px-2 sm:px-3 gap-1.5",
               !selectedDate && "text-muted-foreground",
             )}
           >
             {isNavigating && navigatingDirection === "calendar" ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin flex-shrink-0" />
             ) : (
-              <CalendarIcon className="h-3.5 w-3.5" />
+              <CalendarIcon className="h-3.5 w-3.5 flex-shrink-0" />
             )}
-            <span className="capitalize">{format(selectedDate, "EEEE, d 'de' MMMM yyyy", { locale: es })}</span>
+            <span className="capitalize whitespace-nowrap text-xs sm:text-sm">
+              {format(selectedDate, "EEE d MMM", { locale: es })}
+            </span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0" align="center">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -115,7 +124,7 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
           />
           {!isToday && (
             <div className="p-2 border-t">
-              <Button variant="ghost" size="sm" className="w-full" onClick={goToToday}>
+              <Button variant="ghost" size="sm" className="w-full text-xs sm:text-sm" onClick={goToToday}>
                 Ir a hoy
               </Button>
             </div>
@@ -126,9 +135,10 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8"
+        className="h-8 w-8 flex-shrink-0"
         onClick={goToNextDay}
         disabled={!canGoNext || isNavigating}
+        title="Día siguiente"
       >
         {isNavigating && navigatingDirection === "next" ? (
           <Loader2 className="h-4 w-4 animate-spin" />
