@@ -4,6 +4,7 @@ import { VoiceInput } from "@/components/voice-input"
 import { CardsGrid } from "@/components/cards-grid"
 import { AppHeader } from "@/components/app-header"
 import { DateRedirector } from "@/components/date-redirector"
+import { DebugPanel } from "@/components/debug-panel"
 import { getTodayLocal, formatLocalDate, parseLocalDate } from "@/lib/date-utils"
 
 interface PageProps {
@@ -73,6 +74,9 @@ export default async function AppPage({ searchParams }: PageProps) {
     <div className="min-h-svh cork-texture flex flex-col">
       {/* Ensure date param is always in URL based on client timezone */}
       <DateRedirector />
+      
+      {/* Debug panel - VISIBLE IN PRODUCTION */}
+      <DebugPanel selectedDate={selectedDate} selectedDateStr={actualDateStr} />
       
       <AppHeader userEmail={data.user.email || ""} selectedDate={selectedDate} />
 
