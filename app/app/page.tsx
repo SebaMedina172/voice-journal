@@ -4,11 +4,10 @@ import { VoiceInput } from "@/components/voice-input"
 import { CardsGrid } from "@/components/cards-grid"
 import { AppHeader } from "@/components/app-header"
 import { DateRedirector } from "@/components/date-redirector"
-import { DebugPanel } from "@/components/debug-panel"
 import { getTodayLocal, formatLocalDate, parseLocalDate } from "@/lib/date-utils"
 
 interface PageProps {
-  searchParams: Promise<{ date?: string }>
+  searchParams: Promise<{ date?: string; today?: string }>
 }
 
 export default async function AppPage({ searchParams }: PageProps) {
@@ -20,20 +19,23 @@ export default async function AppPage({ searchParams }: PageProps) {
     redirect("/auth/login")
   }
 
+  // Get date from URL - client always sends this via DateRedirector
   const selectedDateStr = params.date
+  const clientTodayStr = params.today
   
-  const actualDateStr = selectedDateStr || formatLocalDate(getTodayLocal())
+  // Use client's "today" if provided, otherwise fallback to server calculation
+  const actualTodayStr = clientTodayStr || formatLocalDate(getTodayLocal())
+  const actualDateStr = selectedDateStr || actualTodayStr
   
   const selectedDate = parseLocalDate(actualDateStr)
-  const serverToday = getTodayLocal()
-  const serverTodayStr = formatLocalDate(serverToday)
+  const actualToday = parseLocalDate(actualTodayStr)
 
   // No permitir fechas futuras
-  if (selectedDate > serverToday) {
+  if (selectedDate > actualToday) {
     redirect("/app")
   }
 
-  const isToday = actualDateStr === serverTodayStr
+  const isToday = actualDateStr === actualTodayStr
 
   // Obtener el día seleccionado
   const { data: day } = await supabase
@@ -74,9 +76,6 @@ export default async function AppPage({ searchParams }: PageProps) {
     <div className="min-h-svh cork-texture flex flex-col">
       {/* Ensure date param is always in URL based on client timezone */}
       <DateRedirector />
-      
-      {/* Debug panel - VISIBLE IN PRODUCTION */}
-      <DebugPanel selectedDate={selectedDate} selectedDateStr={actualDateStr} />
       
       <AppHeader userEmail={data.user.email || ""} selectedDateStr={actualDateStr} />
 

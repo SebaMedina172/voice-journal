@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { getClientTodayString } from "@/lib/date-utils"
 
 /**
- * This component ensures that /app always has ?date= parameter
- * It redirects to /app?date=YYYY-MM-DD based on client's local timezone
- * This prevents server/client timezone mismatches
+ * This component ensures that /app always has ?date= and ?today= parameters
+ * Sends both the selected date and today's date from client to server
+ * This prevents any timezone mismatches
  */
 export function DateRedirector() {
   const router = useRouter()
@@ -19,12 +19,13 @@ export function DateRedirector() {
     if (hasRedirected.current) return
 
     const currentDate = searchParams.get("date")
+    const todayDate = searchParams.get("today")
     
-    // If no date in URL, redirect with client's local date
-    if (!currentDate) {
+    // If no date params in URL, redirect with client's local dates
+    if (!currentDate || !todayDate) {
       hasRedirected.current = true
       const clientTodayStr = getClientTodayString()
-      router.replace(`/app?date=${clientTodayStr}`)
+      router.replace(`/app?date=${clientTodayStr}&today=${clientTodayStr}`)
     }
   }, [router, searchParams])
 
