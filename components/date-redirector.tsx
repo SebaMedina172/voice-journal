@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { formatLocalDate } from "@/lib/date-utils"
+import { getClientTodayString } from "@/lib/date-utils"
 
 /**
  * This component ensures that /app always has ?date= parameter
@@ -23,8 +23,7 @@ export function DateRedirector() {
     // If no date in URL, redirect with client's local date
     if (!currentDate) {
       hasRedirected.current = true
-      const clientToday = new Date()
-      const clientTodayStr = formatLocalDate(clientToday)
+      const clientTodayStr = getClientTodayString()
       router.replace(`/app?date=${clientTodayStr}`)
     }
   }, [router, searchParams])

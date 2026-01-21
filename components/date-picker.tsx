@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { formatLocalDate, getTodayLocal, isSameDay } from "@/lib/date-utils"
+import { formatLocalDate, getClientTodayString, isSameDay, parseLocalDate } from "@/lib/date-utils"
 
 interface DatePickerProps {
   selectedDate: Date
@@ -24,7 +24,8 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
   const [isNavigating, setIsNavigating] = React.useState(false)
   const [navigatingDirection, setNavigatingDirection] = React.useState<"prev" | "next" | "calendar" | null>(null)
 
-  const today = getTodayLocal()
+  const todayStr = getClientTodayString()
+  const today = parseLocalDate(todayStr)
   const isToday = isSameDay(selectedDate, today)
 
   const navigateToDate = React.useCallback(
