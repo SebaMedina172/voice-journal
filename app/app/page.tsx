@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { VoiceInput } from "@/components/voice-input"
 import { CardsGrid } from "@/components/cards-grid"
 import { AppHeader } from "@/components/app-header"
+import { DateRedirector } from "@/components/date-redirector"
 import { getTodayLocal, formatLocalDate, parseLocalDate } from "@/lib/date-utils"
 
 interface PageProps {
@@ -18,27 +19,27 @@ export default async function AppPage({ searchParams }: PageProps) {
     redirect("/auth/login")
   }
 
-  // Get today in LOCAL timezone (not UTC)
-  const today = getTodayLocal()
-  const todayStr = formatLocalDate(today)
-
-  // Parse selected date in LOCAL timezone
-  const selectedDateStr = params.date || todayStr
-  const selectedDate = parseLocalDate(selectedDateStr)
+  const selectedDateStr = params.date
+  
+  const actualDateStr = selectedDateStr || formatLocalDate(getTodayLocal())
+  
+  const selectedDate = parseLocalDate(actualDateStr)
+  const serverToday = getTodayLocal()
+  const serverTodayStr = formatLocalDate(serverToday)
 
   // No permitir fechas futuras
-  if (selectedDate > today) {
+  if (selectedDate > serverToday) {
     redirect("/app")
   }
 
-  const isToday = selectedDateStr === todayStr
+  const isToday = actualDateStr === serverTodayStr
 
   // Obtener el día seleccionado
   const { data: day } = await supabase
     .from("days")
     .select("*")
     .eq("user_id", data.user.id)
-    .eq("date", selectedDateStr)
+    .eq("date", actualDateStr)
     .single()
 
   const dayId = day?.id || null
@@ -70,6 +71,9 @@ export default async function AppPage({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-svh cork-texture flex flex-col">
+      {/* Ensure date param is always in URL based on client timezone */}
+      <DateRedirector />
+      
       <AppHeader userEmail={data.user.email || ""} selectedDate={selectedDate} />
 
       {/* Main content area - scrollable cards */}
@@ -84,20 +88,20 @@ export default async function AppPage({ searchParams }: PageProps) {
                   <h2 className="text-xs sm:text-sm font-medium text-foreground/70 mb-4 text-center uppercase tracking-wide">
                     Nueva entrada
                   </h2>
-                  <VoiceInput userId={data.user.id} dayId={dayId} todayDate={todayStr} />
+                  <VoiceInput userId={data.user.id} dayId={dayId} todayDate={actualDateStr} />
                 </div>
               </div>
             )}
 
             {/* Right column: Cards grid */}
             <div className={!isToday ? "md:col-span-2" : ""}>
-              <CardsGrid cards={cards} dayId={dayId} isReadOnly={!isToday} selectedDate={selectedDateStr} />
+              <CardsGrid cards={cards} dayId={dayId} isReadOnly={!isToday} selectedDate={actualDateStr} />
             </div>
           </div>
 
           {/* Mobile: Single column with cards only */}
           <div className="md:hidden">
-            <CardsGrid cards={cards} dayId={dayId} isReadOnly={!isToday} selectedDate={selectedDateStr} />
+            <CardsGrid cards={cards} dayId={dayId} isReadOnly={!isToday} selectedDate={actualDateStr} />
           </div>
         </div>
       </main>
@@ -106,7 +110,7 @@ export default async function AppPage({ searchParams }: PageProps) {
       {isToday && (
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-secondary/95 backdrop-blur-md border-t border-border safe-area-inset-bottom">
           <div className="container mx-auto px-2 sm:px-3 py-3 max-w-6xl">
-            <VoiceInput userId={data.user.id} dayId={dayId} todayDate={todayStr} />
+            <VoiceInput userId={data.user.id} dayId={dayId} todayDate={actualDateStr} />
           </div>
         </div>
       )}

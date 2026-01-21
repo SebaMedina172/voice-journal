@@ -16,11 +16,11 @@ export function parseLocalDate(dateString: string): Date {
 export function getTodayLocal(): Date {
   const now = new Date()
   // Use local date components to get the correct date
-  const localYear = now.getFullYear()
-  const localMonth = now.getMonth()
-  const localDate = now.getDate()
+  const year = now.getFullYear()
+  const month = now.getMonth()
+  const date = now.getDate()
   
-  return new Date(localYear, localMonth, localDate)
+  return new Date(year, month, date)
 }
 
 /**

@@ -1,14 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Groq from "groq-sdk"
 import { createClient } from "@/lib/supabase/server"
-import { formatLocalDate } from "@/lib/date-utils"
+import { formatLocalDate, getTodayLocal } from "@/lib/date-utils"
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 })
 
 function getTodayInfo() {
-  const today = new Date()
+  const today = getTodayLocal()
   const dayNames = {
     en: today.toLocaleDateString("en-US", { weekday: "long" }),
     es: today.toLocaleDateString("es-ES", { weekday: "long" }),
