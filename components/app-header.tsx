@@ -12,14 +12,16 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LogOut, User } from "lucide-react"
 import { DatePicker } from "@/components/date-picker"
+import { parseLocalDate } from "@/lib/date-utils"
 
 interface AppHeaderProps {
   userEmail: string
-  selectedDate: Date
+  selectedDateStr: string
 }
 
-export function AppHeader({ userEmail, selectedDate }: AppHeaderProps) {
+export function AppHeader({ userEmail, selectedDateStr }: AppHeaderProps) {
   const router = useRouter()
+  const selectedDate = parseLocalDate(selectedDateStr)
 
   const handleLogout = async () => {
     const supabase = createClient()

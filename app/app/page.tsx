@@ -78,7 +78,7 @@ export default async function AppPage({ searchParams }: PageProps) {
       {/* Debug panel - VISIBLE IN PRODUCTION */}
       <DebugPanel selectedDate={selectedDate} selectedDateStr={actualDateStr} />
       
-      <AppHeader userEmail={data.user.email || ""} selectedDate={selectedDate} />
+      <AppHeader userEmail={data.user.email || ""} selectedDateStr={actualDateStr} />
 
       {/* Main content area - scrollable cards */}
       <main className="flex-1 overflow-y-auto pb-32 md:pb-6">
