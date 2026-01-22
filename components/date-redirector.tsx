@@ -20,12 +20,14 @@ export function DateRedirector() {
 
     const currentDate = searchParams.get("date")
     const todayDate = searchParams.get("today")
+    const clientTodayStr = getClientTodayString()
     
     // If no date params in URL, redirect with client's local dates
     if (!currentDate || !todayDate) {
       hasRedirected.current = true
-      const clientTodayStr = getClientTodayString()
-      router.replace(`/app?date=${clientTodayStr}&today=${clientTodayStr}`)
+      const dateToUse = currentDate || clientTodayStr
+      const todayToUse = clientTodayStr
+      router.replace(`/app?date=${dateToUse}&today=${todayToUse}`)
     }
   }, [router, searchParams])
 

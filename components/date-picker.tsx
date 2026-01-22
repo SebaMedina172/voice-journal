@@ -33,9 +33,9 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
       setIsNavigating(true)
       setNavigatingDirection(direction)
       const dateStr = formatLocalDate(date)
-      router.push(`/app?date=${dateStr}`)
+      router.push(`/app?date=${dateStr}&today=${todayStr}`)
     },
-    [router],
+    [router, todayStr],
   )
 
   React.useEffect(() => {
@@ -68,7 +68,7 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
     if (isNavigating) return
     setIsNavigating(true)
     setNavigatingDirection("calendar")
-    router.push("/app")
+    router.push(`/app?date=${todayStr}&today=${todayStr}`)
   }
 
   const canGoNext = !isToday
