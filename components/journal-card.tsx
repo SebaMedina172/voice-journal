@@ -164,32 +164,77 @@ export function JournalCard({
 
   // Handler for syncing to Google Calendar
   const handleCalendarSync = async (data: CalendarEventData) => {
-    // TODO: Implement actual Google Calendar API call in Phase 7.2
-    // For now, just simulate the sync and update local state
-    
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    
-    // Update local state to show synced status
-    setLocalSyncedCalendar(true)
-    
-    // TODO: Update database is_synced_calendar field
-    // await fetch(`/api/cards/${id}/sync`, { method: 'PATCH', body: { is_synced_calendar: true } })
+    try {
+      const response = await fetch('/api/google/calendar/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cardId: id,
+          title: data.title,
+          description: data.description,
+          startDate: data.startDate,
+          startTime: data.startTime,
+          endDate: data.endDate,
+          endTime: data.endTime,
+          reminder: data.reminder,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to sync to calendar')
+      }
+
+      const result = await response.json()
+      console.log('Calendar sync successful:', result)
+      
+      // Update local state to show synced status
+      setLocalSyncedCalendar(true)
+      
+      // Refresh to update from database
+      router.refresh()
+    } catch (error) {
+      console.error('Calendar sync error:', error)
+      throw error
+    }
   }
 
   // Handler for syncing to Google Tasks
   const handleTasksSync = async (data: TaskData) => {
-    // TODO: Implement actual Google Tasks API call in Phase 7.2
-    // For now, just simulate the sync and update local state
-    
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    
-    // Update local state to show synced status
-    setLocalSyncedTasks(true)
-    
-    // TODO: Update database is_synced_tasks field
-    // await fetch(`/api/cards/${id}/sync`, { method: 'PATCH', body: { is_synced_tasks: true } })
+    try {
+      const response = await fetch('/api/google/tasks/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cardId: id,
+          title: data.title,
+          notes: data.notes,
+          dueDate: data.dueDate,
+          status: 'needsAction',
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to sync to tasks')
+      }
+
+      const result = await response.json()
+      console.log('Tasks sync successful:', result)
+      
+      // Update local state to show synced status
+      setLocalSyncedTasks(true)
+      
+      // Refresh to update from database
+      router.refresh()
+    } catch (error) {
+      console.error('Tasks sync error:', error)
+      throw error
+    }
   }
 
   return (
