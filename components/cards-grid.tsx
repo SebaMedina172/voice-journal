@@ -16,6 +16,8 @@ interface CardData {
   detected_date: string | null
   has_calendar_action: boolean
   has_task_action: boolean
+  is_synced_calendar: boolean
+  is_synced_tasks: boolean
   position: number
   created_at: string
 }
@@ -87,6 +89,8 @@ export function CardsGrid({ cards, dayId, isReadOnly = false, selectedDate }: Ca
               detectedDate={card.detected_date}
               hasCalendarAction={card.has_calendar_action}
               hasTaskAction={card.has_task_action}
+              isSyncedCalendar={card.is_synced_calendar}
+              isSyncedTasks={card.is_synced_tasks}
               createdAt={card.created_at}
               isReadOnly={isReadOnly}
             />

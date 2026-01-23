@@ -58,6 +58,8 @@ export default async function AppPage({ searchParams }: PageProps) {
     detected_date: string | null
     has_calendar_action: boolean
     has_task_action: boolean
+    is_synced_calendar: boolean
+    is_synced_tasks: boolean
     position: number
     created_at: string
   }> = []
