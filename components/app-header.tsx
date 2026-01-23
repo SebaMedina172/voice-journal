@@ -13,6 +13,7 @@ import {
 import { LogOut, User } from "lucide-react"
 import { DatePicker } from "@/components/date-picker"
 import { parseLocalDate } from "@/lib/date-utils"
+import { GoogleConnectButton } from "@/components/google-connect-button"
 
 interface AppHeaderProps {
   userEmail: string
@@ -61,6 +62,10 @@ export function AppHeader({ userEmail, selectedDateStr }: AppHeaderProps) {
                 <div className="px-2 py-1.5">
                   <p className="text-xs sm:text-sm font-medium text-foreground truncate">{userEmail}</p>
                 </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="text-xs sm:text-sm p-0">
+                  <GoogleConnectButton />
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive text-xs sm:text-sm">
                   <LogOut className="mr-2 h-4 w-4 flex-shrink-0" />
