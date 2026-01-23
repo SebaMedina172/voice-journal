@@ -10,6 +10,8 @@ import type { CardType, CardColor, Mood } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { useState, useMemo } from "react"
+import { GoogleCalendarModal, type CalendarEventData } from "@/components/google-calendar-modal"
+import { GoogleTasksModal, type TaskData } from "@/components/google-tasks-modal"
 
 interface JournalCardProps {
   id: string
@@ -21,6 +23,8 @@ interface JournalCardProps {
   detectedDate: string | null
   hasCalendarAction: boolean
   hasTaskAction: boolean
+  isSyncedCalendar: boolean
+  isSyncedTasks: boolean
   createdAt: string
   isReadOnly?: boolean
 }
@@ -65,6 +69,8 @@ export function JournalCard({
   detectedDate,
   hasCalendarAction,
   hasTaskAction,
+  isSyncedCalendar,
+  isSyncedTasks,
   isReadOnly = false,
 }: JournalCardProps) {
   const router = useRouter()
@@ -74,6 +80,12 @@ export function JournalCard({
   const [editContent, setEditContent] = useState(content)
   const [isSaving, setIsSaving] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
+  
+  // Modal states
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false)
+  const [isTasksModalOpen, setIsTasksModalOpen] = useState(false)
+  const [localSyncedCalendar, setLocalSyncedCalendar] = useState(isSyncedCalendar)
+  const [localSyncedTasks, setLocalSyncedTasks] = useState(isSyncedTasks)
 
   const { icon: Icon, label } = typeConfig[type]
   const postitStyle = postitColors[color]
@@ -149,6 +161,36 @@ export function JournalCard({
         month: "short",
       })
     : null
+
+  // Handler for syncing to Google Calendar
+  const handleCalendarSync = async (data: CalendarEventData) => {
+    // TODO: Implement actual Google Calendar API call in Phase 7.2
+    // For now, just simulate the sync and update local state
+    
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    
+    // Update local state to show synced status
+    setLocalSyncedCalendar(true)
+    
+    // TODO: Update database is_synced_calendar field
+    // await fetch(`/api/cards/${id}/sync`, { method: 'PATCH', body: { is_synced_calendar: true } })
+  }
+
+  // Handler for syncing to Google Tasks
+  const handleTasksSync = async (data: TaskData) => {
+    // TODO: Implement actual Google Tasks API call in Phase 7.2
+    // For now, just simulate the sync and update local state
+    
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    
+    // Update local state to show synced status
+    setLocalSyncedTasks(true)
+    
+    // TODO: Update database is_synced_tasks field
+    // await fetch(`/api/cards/${id}/sync`, { method: 'PATCH', body: { is_synced_tasks: true } })
+  }
 
   return (
     <div
@@ -265,8 +307,14 @@ export function JournalCard({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 text-foreground/60 hover:text-foreground hover:bg-foreground/10"
-                  title="Agendar en calendario"
+                  className={cn(
+                    "h-6 w-6 transition-colors",
+                    localSyncedCalendar 
+                      ? "text-green-600 hover:text-green-700 hover:bg-green-100/50" 
+                      : "text-foreground/60 hover:text-foreground hover:bg-foreground/10"
+                  )}
+                  title={localSyncedCalendar ? "Ya sincronizado - Click para crear otro evento" : "Agendar en calendario"}
+                  onClick={() => setIsCalendarModalOpen(true)}
                 >
                   <Calendar className="h-3.5 w-3.5" />
                   <span className="sr-only">Agendar</span>
@@ -276,8 +324,14 @@ export function JournalCard({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 text-foreground/60 hover:text-foreground hover:bg-foreground/10"
-                  title="Crear tarea"
+                  className={cn(
+                    "h-6 w-6 transition-colors",
+                    localSyncedTasks 
+                      ? "text-green-600 hover:text-green-700 hover:bg-green-100/50" 
+                      : "text-foreground/60 hover:text-foreground hover:bg-foreground/10"
+                  )}
+                  title={localSyncedTasks ? "Ya sincronizado - Click para crear otra tarea" : "Crear tarea"}
+                  onClick={() => setIsTasksModalOpen(true)}
                 >
                   <CheckSquare className="h-3.5 w-3.5" />
                   <span className="sr-only">Crear tarea</span>
@@ -287,6 +341,30 @@ export function JournalCard({
           )}
         </div>
       )}
+
+      {/* Google Calendar Modal */}
+      <GoogleCalendarModal
+        isOpen={isCalendarModalOpen}
+        onClose={() => setIsCalendarModalOpen(false)}
+        onSync={handleCalendarSync}
+        initialData={{
+          title,
+          description: content,
+          date: detectedDate,
+        }}
+      />
+
+      {/* Google Tasks Modal */}
+      <GoogleTasksModal
+        isOpen={isTasksModalOpen}
+        onClose={() => setIsTasksModalOpen(false)}
+        onSync={handleTasksSync}
+        initialData={{
+          title,
+          description: content,
+          date: detectedDate,
+        }}
+      />
     </div>
   )
 }
