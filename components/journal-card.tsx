@@ -182,13 +182,11 @@ export function JournalCard({
         }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to sync to calendar')
-      }
-
       const result = await response.json()
-      console.log('Calendar sync successful:', result)
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to sync to calendar')
+      }
       
       // Update local state to show synced status
       setLocalSyncedCalendar(true)
@@ -218,13 +216,11 @@ export function JournalCard({
         }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to sync to tasks')
-      }
-
       const result = await response.json()
-      console.log('Tasks sync successful:', result)
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to sync to tasks')
+      }
       
       // Update local state to show synced status
       setLocalSyncedTasks(true)
@@ -397,6 +393,7 @@ export function JournalCard({
           description: content,
           date: detectedDate,
         }}
+        previouslySynced={localSyncedCalendar}
       />
 
       {/* Google Tasks Modal */}
@@ -409,6 +406,7 @@ export function JournalCard({
           description: content,
           date: detectedDate,
         }}
+        previouslySynced={localSyncedTasks}
       />
     </div>
   )

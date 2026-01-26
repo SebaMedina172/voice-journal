@@ -70,6 +70,7 @@ export async function POST(request: Request) {
 
     // Refresh token if expired
     if (tokenData.expires_at <= currentTime) {
+      console.log('Access token expired, refreshing...')
       const newTokens = await refreshAccessToken(tokenData.refresh_token)
       accessToken = newTokens.access_token
 
@@ -131,12 +132,15 @@ export async function POST(request: Request) {
     }
 
     const calendarEvent = await calendarResponse.json()
-    //console.log('Calendar event created:', calendarEvent.id)
+    console.log('Calendar event created:', calendarEvent.id)
 
-    // Update card to mark as synced
+    // Update card to mark as synced and store event ID
     const { error: updateError } = await supabase
       .from('cards')
-      .update({ is_synced_calendar: true })
+      .update({
+        is_synced_calendar: true,
+        google_calendar_event_id: calendarEvent.id,
+      })
       .eq('id', cardId)
 
     if (updateError) {

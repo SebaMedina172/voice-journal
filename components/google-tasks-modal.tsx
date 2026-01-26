@@ -26,6 +26,7 @@ interface GoogleTasksModalProps {
     description: string
     date: string | null
   }
+  previouslySynced?: boolean
 }
 
 export interface TaskData {
@@ -39,6 +40,7 @@ export function GoogleTasksModal({
   onClose,
   onSync,
   initialData,
+  previouslySynced = false,
 }: GoogleTasksModalProps) {
   const [title, setTitle] = useState("")
   const [notes, setNotes] = useState("")
@@ -98,6 +100,15 @@ export function GoogleTasksModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Warning if previously synced */}
+          {previouslySynced && (
+            <div className="rounded-md bg-amber-500/10 border border-amber-500/30 p-3">
+              <p className="text-sm text-amber-600 dark:text-amber-400">
+                Esta card ya fue sincronizada anteriormente. Se creara una nueva tarea en Google Tasks.
+              </p>
+            </div>
+          )}
+
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="task-title">Titulo</Label>

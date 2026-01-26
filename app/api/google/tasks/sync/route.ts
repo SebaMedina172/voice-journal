@@ -77,6 +77,7 @@ export async function POST(request: Request) {
 
     // Check if token is expired and refresh if needed
     if (tokenData.expires_at <= currentTime) {
+      console.log('Access token expired, refreshing...')
       const newTokens = await refreshAccessToken(tokenData.refresh_token)
       
       accessToken = newTokens.access_token
@@ -93,6 +94,7 @@ export async function POST(request: Request) {
     }
 
     // Create task in Google Tasks
+    // First, get or create the default task list
     const taskListResponse = await fetch(
       'https://tasks.googleapis.com/tasks/v1/users/@me/lists',
       {
@@ -158,12 +160,14 @@ export async function POST(request: Request) {
     }
 
     const createdTask = await createTaskResponse.json()
-    console.log('Calendar event created:', createdTask.id)
 
-    // Update card in database to mark as synced
+    // Update card in database to mark as synced and store task ID
     const { error: updateError } = await supabase
       .from('cards')
-      .update({ is_synced_tasks: true })
+      .update({
+        is_synced_tasks: true,
+        google_tasks_task_id: createdTask.id,
+      })
       .eq('id', cardId)
 
     if (updateError) {

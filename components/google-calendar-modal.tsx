@@ -33,6 +33,7 @@ interface GoogleCalendarModalProps {
     description: string
     date: string | null
   }
+  previouslySynced?: boolean
 }
 
 export interface CalendarEventData {
@@ -60,6 +61,7 @@ export function GoogleCalendarModal({
   onClose,
   onSync,
   initialData,
+  previouslySynced = false,
 }: GoogleCalendarModalProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -132,6 +134,15 @@ export function GoogleCalendarModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Warning if previously synced */}
+          {previouslySynced && (
+            <div className="rounded-md bg-amber-500/10 border border-amber-500/30 p-3">
+              <p className="text-sm text-amber-600 dark:text-amber-400">
+                Esta card ya fue sincronizada anteriormente. Se creara un nuevo evento en tu calendario.
+              </p>
+            </div>
+          )}
+
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="event-title">Titulo</Label>
