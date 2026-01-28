@@ -87,7 +87,7 @@ export function GoogleConnectButton() {
 
   if (isLoading) {
     return (
-      <Button variant="ghost" size="sm" disabled className="w-full justify-start">
+      <Button variant="outline" size="sm" disabled>
         Cargando...
       </Button>
     )
@@ -96,10 +96,9 @@ export function GoogleConnectButton() {
   if (isConnected) {
     return (
       <Button
-        variant="ghost"
+        variant="destructive"
         size="sm"
         onClick={handleDisconnect}
-        className="w-full justify-start text-destructive hover:text-destructive"
       >
         Desvincular Google
       </Button>
@@ -108,10 +107,9 @@ export function GoogleConnectButton() {
 
   return (
     <Button
-      variant="ghost"
+      variant="default"
       size="sm"
       onClick={handleConnect}
-      className="w-full justify-start"
     >
       Conectar Google
     </Button>
