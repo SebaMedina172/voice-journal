@@ -90,11 +90,11 @@ export function GoogleTasksModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md bg-card">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-foreground">
-            <CheckSquare className="h-5 w-5 text-primary" />
-            Crear Tarea en Google Tasks
+          <DialogTitle className="flex items-center gap-2 text-foreground pr-8">
+            <CheckSquare className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+            <span className="text-sm sm:text-base">Crear Tarea en Google Tasks</span>
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Revisa y modifica los datos antes de sincronizar con Google Tasks.
           </DialogDescription>
         </DialogHeader>
