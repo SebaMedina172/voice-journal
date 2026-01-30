@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { PWARegister } from "@/components/pwa-register"
+import { I18nProvider } from "@/lib/i18n/context"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -54,8 +55,10 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className="font-sans antialiased">
-        <PWARegister />
-        {children}
+        <I18nProvider>
+          <PWARegister />
+          {children}
+        </I18nProvider>
       </body>
     </html>
   )
