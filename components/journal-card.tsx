@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation"
 import { useState, useMemo } from "react"
 import { GoogleCalendarModal, type CalendarEventData } from "@/components/google-calendar-modal"
 import { GoogleTasksModal, type TaskData } from "@/components/google-tasks-modal"
+import { useI18n } from "@/lib/i18n/context"
 
 interface JournalCardProps {
   id: string
@@ -29,36 +30,6 @@ interface JournalCardProps {
   isReadOnly?: boolean
 }
 
-const typeConfig: Record<CardType, { icon: typeof Heart; label: string }> = {
-  emotion: { icon: Heart, label: "Emocion" },
-  activity: { icon: Activity, label: "Actividad" },
-  task: { icon: CheckSquare, label: "Tarea" },
-  event: { icon: Calendar, label: "Evento" },
-  note: { icon: FileText, label: "Nota" },
-}
-
-const postitColors: Record<CardColor, { bg: string; pin: string }> = {
-  amber: { bg: "bg-postit-cream", pin: "bg-pin-yellow" },
-  blue: { bg: "bg-postit-blue", pin: "bg-pin-blue" },
-  green: { bg: "bg-postit-green", pin: "bg-pin-green" },
-  purple: { bg: "bg-postit-lavender", pin: "bg-pin-blue" },
-  gray: { bg: "bg-postit-cream", pin: "bg-pin-red" },
-  rose: { bg: "bg-postit-pink", pin: "bg-pin-red" },
-  indigo: { bg: "bg-postit-blue", pin: "bg-pin-blue" },
-}
-
-const moodLabels: Record<Mood, string> = {
-  happy: "Feliz",
-  sad: "Triste",
-  stressed: "Estresado",
-  calm: "Calmado",
-  excited: "Emocionado",
-  anxious: "Ansioso",
-  grateful: "Agradecido",
-  frustrated: "Frustrado",
-  neutral: "Neutral",
-}
-
 export function JournalCard({
   id,
   type,
@@ -74,6 +45,7 @@ export function JournalCard({
   isReadOnly = false,
 }: JournalCardProps) {
   const router = useRouter()
+  const { t, locale } = useI18n()
   const [isDeleting, setIsDeleting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(title)
@@ -86,6 +58,36 @@ export function JournalCard({
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false)
   const [localSyncedCalendar, setLocalSyncedCalendar] = useState(isSyncedCalendar)
   const [localSyncedTasks, setLocalSyncedTasks] = useState(isSyncedTasks)
+
+  const typeConfig: Record<CardType, { icon: typeof Heart; label: string }> = {
+    emotion: { icon: Heart, label: t("journal.categories.reflection") },
+    activity: { icon: Activity, label: t("journal.categories.event") },
+    task: { icon: CheckSquare, label: t("journal.categories.task") },
+    event: { icon: Calendar, label: t("journal.categories.event") },
+    note: { icon: FileText, label: t("journal.categories.thought") },
+  }
+
+  const postitColors: Record<CardColor, { bg: string; pin: string }> = {
+    amber: { bg: "bg-postit-cream", pin: "bg-pin-yellow" },
+    blue: { bg: "bg-postit-blue", pin: "bg-pin-blue" },
+    green: { bg: "bg-postit-green", pin: "bg-pin-green" },
+    purple: { bg: "bg-postit-lavender", pin: "bg-pin-blue" },
+    gray: { bg: "bg-postit-cream", pin: "bg-pin-red" },
+    rose: { bg: "bg-postit-pink", pin: "bg-pin-red" },
+    indigo: { bg: "bg-postit-blue", pin: "bg-pin-blue" },
+  }
+
+  const moodLabels: Record<Mood, string> = {
+    happy: t("journal.moods.happy"),
+    sad: t("journal.moods.sad"),
+    stressed: t("journal.moods.anxious"),
+    calm: t("journal.moods.calm"),
+    excited: t("journal.moods.excited"),
+    anxious: t("journal.moods.anxious"),
+    grateful: t("journal.moods.grateful"),
+    frustrated: t("journal.moods.frustrated"),
+    neutral: t("journal.moods.neutral"),
+  }
 
   const { icon: Icon, label } = typeConfig[type]
   const postitStyle = postitColors[color]
@@ -155,7 +157,7 @@ export function JournalCard({
   }
 
   const formattedDate = detectedDate
-    ? new Date(detectedDate + "T12:00:00").toLocaleDateString("es-ES", {
+    ? new Date(detectedDate + "T12:00:00").toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
         weekday: "short",
         day: "numeric",
         month: "short",
@@ -233,6 +235,14 @@ export function JournalCard({
     }
   }
 
+  const calendarTooltip = localSyncedCalendar 
+    ? (locale === "es" ? "Ya sincronizado - Click para crear otro evento" : "Already synced - Click to create another event")
+    : (locale === "es" ? "Agendar en calendario" : "Schedule in calendar")
+
+  const taskTooltip = localSyncedTasks 
+    ? (locale === "es" ? "Ya sincronizado - Click para crear otra tarea" : "Already synced - Click to create another task")
+    : (locale === "es" ? "Crear tarea" : "Create task")
+
   return (
     <div
       className={cn("postit relative rounded-sm p-4 pt-6", postitStyle.bg, isExiting && "postit-exit")}
@@ -269,7 +279,7 @@ export function JournalCard({
                   disabled={isSaving}
                 >
                   <X className="h-3.5 w-3.5" />
-                  <span className="sr-only">Cancelar</span>
+                  <span className="sr-only">{t("common.cancel")}</span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -279,7 +289,7 @@ export function JournalCard({
                   disabled={isSaving || !editTitle.trim() || !editContent.trim()}
                 >
                   <Check className="h-3.5 w-3.5" />
-                  <span className="sr-only">Guardar</span>
+                  <span className="sr-only">{t("common.save")}</span>
                 </Button>
               </>
             ) : (
@@ -291,7 +301,7 @@ export function JournalCard({
                   onClick={handleEdit}
                 >
                   <Pencil className="h-3.5 w-3.5" />
-                  <span className="sr-only">Editar</span>
+                  <span className="sr-only">{t("common.edit")}</span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -301,7 +311,7 @@ export function JournalCard({
                   disabled={isDeleting}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                  <span className="sr-only">Eliminar</span>
+                  <span className="sr-only">{t("common.delete")}</span>
                 </Button>
               </>
             )}
@@ -315,7 +325,7 @@ export function JournalCard({
           value={editTitle}
           onChange={(e) => setEditTitle(e.target.value)}
           className="text-base font-semibold bg-white/50 border-foreground/20 mb-2"
-          placeholder="Titulo"
+          placeholder={locale === "es" ? "Titulo" : "Title"}
         />
       ) : (
         <h3 className="text-base font-semibold text-foreground leading-tight mb-2">{title}</h3>
@@ -327,7 +337,7 @@ export function JournalCard({
           value={editContent}
           onChange={(e) => setEditContent(e.target.value)}
           className="text-sm bg-white/50 border-foreground/20 min-h-[60px] resize-none"
-          placeholder="Contenido"
+          placeholder={locale === "es" ? "Contenido" : "Content"}
         />
       ) : (
         <p className="text-sm text-foreground/70 leading-relaxed">{content}</p>
@@ -354,11 +364,11 @@ export function JournalCard({
                       ? "text-green-600 hover:text-green-700 hover:bg-green-100/50" 
                       : "text-foreground/60 hover:text-foreground hover:bg-foreground/10"
                   )}
-                  title={localSyncedCalendar ? "Ya sincronizado - Click para crear otro evento" : "Agendar en calendario"}
+                  title={calendarTooltip}
                   onClick={() => setIsCalendarModalOpen(true)}
                 >
                   <Calendar className="h-3.5 w-3.5" />
-                  <span className="sr-only">Agendar</span>
+                  <span className="sr-only">{locale === "es" ? "Agendar" : "Schedule"}</span>
                 </Button>
               )}
               {hasTaskAction && (
@@ -371,11 +381,11 @@ export function JournalCard({
                       ? "text-green-600 hover:text-green-700 hover:bg-green-100/50" 
                       : "text-foreground/60 hover:text-foreground hover:bg-foreground/10"
                   )}
-                  title={localSyncedTasks ? "Ya sincronizado - Click para crear otra tarea" : "Crear tarea"}
+                  title={taskTooltip}
                   onClick={() => setIsTasksModalOpen(true)}
                 >
                   <CheckSquare className="h-3.5 w-3.5" />
-                  <span className="sr-only">Crear tarea</span>
+                  <span className="sr-only">{locale === "es" ? "Crear tarea" : "Create task"}</span>
                 </Button>
               )}
             </div>

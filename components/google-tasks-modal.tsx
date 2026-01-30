@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { CheckSquare, Calendar, Loader2 } from "lucide-react"
+import { useI18n } from "@/lib/i18n/context"
 
 interface GoogleTasksModalProps {
   isOpen: boolean
@@ -42,6 +43,7 @@ export function GoogleTasksModal({
   initialData,
   previouslySynced = false,
 }: GoogleTasksModalProps) {
+  const { t, locale } = useI18n()
   const [title, setTitle] = useState("")
   const [notes, setNotes] = useState("")
   const [dueDate, setDueDate] = useState("")
@@ -92,10 +94,14 @@ export function GoogleTasksModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground pr-8">
             <CheckSquare className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-            <span className="text-sm sm:text-base">Crear Tarea en Google Tasks</span>
+            <span className="text-sm sm:text-base">
+              {locale === "es" ? "Crear Tarea en Google Tasks" : "Create Google Task"}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
-            Revisa y modifica los datos antes de sincronizar con Google Tasks.
+            {locale === "es"
+              ? "Revisa y modifica los datos antes de sincronizar con Google Tasks."
+              : "Review and modify the data before syncing with Google Tasks."}
           </DialogDescription>
         </DialogHeader>
 
@@ -104,19 +110,23 @@ export function GoogleTasksModal({
           {previouslySynced && (
             <div className="rounded-md bg-amber-500/10 border border-amber-500/30 p-3">
               <p className="text-sm text-amber-600 dark:text-amber-400">
-                Esta card ya fue sincronizada anteriormente. Se creara una nueva tarea en Google Tasks.
+                {locale === "es"
+                  ? "Esta card ya fue sincronizada anteriormente. Se creara una nueva tarea en Google Tasks."
+                  : "This card was previously synced. A new task will be created in Google Tasks."}
               </p>
             </div>
           )}
 
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="task-title">Titulo</Label>
+            <Label htmlFor="task-title">
+              {locale === "es" ? "Titulo" : "Title"}
+            </Label>
             <Input
               id="task-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Titulo de la tarea"
+              placeholder={locale === "es" ? "Titulo de la tarea" : "Task title"}
               className="bg-input"
               required
             />
@@ -124,12 +134,14 @@ export function GoogleTasksModal({
 
           {/* Notes/Description */}
           <div className="space-y-2">
-            <Label htmlFor="task-notes">Notas</Label>
+            <Label htmlFor="task-notes">
+              {locale === "es" ? "Notas" : "Notes"}
+            </Label>
             <Textarea
               id="task-notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notas adicionales (opcional)"
+              placeholder={locale === "es" ? "Notas adicionales (opcional)" : "Additional notes (optional)"}
               className="bg-input min-h-[100px] resize-none"
             />
           </div>
@@ -138,7 +150,7 @@ export function GoogleTasksModal({
           <div className="space-y-2">
             <Label htmlFor="due-date" className="flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-              Fecha de vencimiento
+              {locale === "es" ? "Fecha de vencimiento" : "Due date"}
             </Label>
             <div className="flex gap-2">
               <Input
@@ -156,12 +168,14 @@ export function GoogleTasksModal({
                   onClick={handleClearDate}
                   className="text-xs bg-transparent"
                 >
-                  Quitar fecha
+                  {locale === "es" ? "Quitar fecha" : "Clear date"}
                 </Button>
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Puedes dejar la fecha vacia si la tarea no tiene vencimiento.
+              {locale === "es"
+                ? "Puedes dejar la fecha vacia si la tarea no tiene vencimiento."
+                : "You can leave the date empty if the task has no due date."}
             </p>
           </div>
 
@@ -172,7 +186,7 @@ export function GoogleTasksModal({
               onClick={handleClose}
               disabled={isSyncing}
             >
-              Cancelar
+              {t("common.cancel")}
             </Button>
             <Button
               type="submit"
@@ -182,12 +196,12 @@ export function GoogleTasksModal({
               {isSyncing ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Sincronizando...
+                  {locale === "es" ? "Sincronizando..." : "Syncing..."}
                 </>
               ) : (
                 <>
                   <CheckSquare className="h-4 w-4" />
-                  Crear Tarea
+                  {locale === "es" ? "Crear Tarea" : "Create Task"}
                 </>
               )}
             </Button>

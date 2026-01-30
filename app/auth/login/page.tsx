@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useTranslation } from "@/lib/i18n/context"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { t } = useTranslation()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,8 +33,8 @@ export default function LoginPage() {
       })
       if (error) throw error
       router.push("/app")
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "Ocurrió un error")
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t("auth.login.errorInvalid"))
     } finally {
       setIsLoading(false)
     }
@@ -43,18 +45,18 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-xl sm:text-2xl">Bienvenido de vuelta</CardTitle>
-            <CardDescription className="text-xs sm:text-sm">Ingresa tu email para acceder a tu diario</CardDescription>
+            <CardTitle className="text-xl sm:text-2xl">{t("auth.login.title")}</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">{t("auth.login.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin}>
               <div className="flex flex-col gap-3 sm:gap-4">
                 <div className="grid gap-1.5 sm:gap-2">
-                  <Label htmlFor="email" className="text-xs sm:text-sm">Email</Label>
+                  <Label htmlFor="email" className="text-xs sm:text-sm">{t("auth.login.emailLabel")}</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="tu@email.com"
+                    placeholder={t("auth.login.emailPlaceholder")}
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -62,7 +64,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="grid gap-1.5 sm:gap-2">
-                  <Label htmlFor="password" className="text-xs sm:text-sm">Contraseña</Label>
+                  <Label htmlFor="password" className="text-xs sm:text-sm">{t("auth.login.passwordLabel")}</Label>
                   <Input
                     id="password"
                     type="password"
@@ -74,13 +76,13 @@ export default function LoginPage() {
                 </div>
                 {error && <p className="text-xs sm:text-sm text-destructive">{error}</p>}
                 <Button type="submit" className="w-full text-sm sm:text-base" disabled={isLoading}>
-                  {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
+                  {isLoading ? t("auth.login.loadingButton") : t("auth.login.submitButton")}
                 </Button>
               </div>
               <div className="mt-3 sm:mt-4 text-center text-xs sm:text-sm">
-                ¿No tienes cuenta?{" "}
+                {t("auth.login.noAccount")}{" "}
                 <Link href="/auth/sign-up" className="underline underline-offset-4">
-                  Regístrate
+                  {t("auth.login.signUpLink")}
                 </Link>
               </div>
             </form>

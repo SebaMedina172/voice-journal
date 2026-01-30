@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { format } from "date-fns"
-import { es } from "date-fns/locale"
+import { es, enUS } from "date-fns/locale"
 import { CalendarIcon, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { useRouter, usePathname } from "next/navigation"
 
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { formatLocalDate, getClientTodayString, isSameDay, parseLocalDate } from "@/lib/date-utils"
+import { useI18n } from "@/lib/i18n/context"
 
 interface DatePickerProps {
   selectedDate: Date
@@ -20,6 +21,7 @@ interface DatePickerProps {
 export function DatePicker({ selectedDate, className }: DatePickerProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const { t, locale } = useI18n()
   const [open, setOpen] = React.useState(false)
   const [isNavigating, setIsNavigating] = React.useState(false)
   const [navigatingDirection, setNavigatingDirection] = React.useState<"prev" | "next" | "calendar" | null>(null)
@@ -27,6 +29,7 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
   const todayStr = getClientTodayString()
   const today = parseLocalDate(todayStr)
   const isToday = isSameDay(selectedDate, today)
+  const dateLocale = locale === "es" ? es : enUS
 
   const navigateToDate = React.useCallback(
     (date: Date, direction: "prev" | "next" | "calendar") => {
@@ -73,6 +76,9 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
 
   const canGoNext = !isToday
 
+  const prevDayLabel = locale === "es" ? "Dia anterior" : "Previous day"
+  const nextDayLabel = locale === "es" ? "Dia siguiente" : "Next day"
+
   return (
     <div className={cn("inline-flex items-center gap-1", className)}>
       <Button 
@@ -81,14 +87,14 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
         className="h-8 w-8 flex-shrink-0" 
         onClick={goToPreviousDay} 
         disabled={isNavigating}
-        title="Día anterior"
+        title={prevDayLabel}
       >
         {isNavigating && navigatingDirection === "prev" ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
           <ChevronLeft className="h-4 w-4" />
         )}
-        <span className="sr-only">Día anterior</span>
+        <span className="sr-only">{prevDayLabel}</span>
       </Button>
 
       <Popover open={open} onOpenChange={setOpen}>
@@ -107,7 +113,7 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
               <CalendarIcon className="h-3.5 w-3.5 flex-shrink-0" />
             )}
             <span className="capitalize whitespace-nowrap text-xs sm:text-sm">
-              {format(selectedDate, "EEE d MMM", { locale: es })}
+              {format(selectedDate, "EEE d MMM", { locale: dateLocale })}
             </span>
           </Button>
         </PopoverTrigger>
@@ -118,12 +124,12 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
             onSelect={handleDateSelect}
             disabled={(date: Date) => date > today}
             initialFocus
-            locale={es}
+            locale={dateLocale}
           />
           {!isToday && (
             <div className="p-2 border-t">
               <Button variant="ghost" size="sm" className="w-full text-xs sm:text-sm" onClick={goToToday}>
-                Ir a hoy
+                {t("datePicker.goToToday")}
               </Button>
             </div>
           )}
@@ -136,14 +142,14 @@ export function DatePicker({ selectedDate, className }: DatePickerProps) {
         className="h-8 w-8 flex-shrink-0"
         onClick={goToNextDay}
         disabled={!canGoNext || isNavigating}
-        title="Día siguiente"
+        title={nextDayLabel}
       >
         {isNavigating && navigatingDirection === "next" ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
           <ChevronRight className="h-4 w-4" />
         )}
-        <span className="sr-only">Día siguiente</span>
+        <span className="sr-only">{nextDayLabel}</span>
       </Button>
     </div>
   )

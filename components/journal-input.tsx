@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Loader2, Send, Sparkles, Mic, MicOff } from "lucide-react"
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n/context"
 
 interface JournalInputProps {
   userId: string
@@ -22,6 +23,7 @@ export function JournalInput({ userId, dayId, todayDate }: JournalInputProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { t, locale } = useI18n()
 
   const {
     text: voiceText,
@@ -31,7 +33,7 @@ export function JournalInput({ userId, dayId, todayDate }: JournalInputProps) {
     start,
     stop,
     reset,
-  } = useSpeechRecognition({ lang: "es-ES" })
+  } = useSpeechRecognition({ lang: locale === "es" ? "es-ES" : "en-US" })
 
   useEffect(() => {
     if (voiceText) {
@@ -66,13 +68,13 @@ export function JournalInput({ userId, dayId, todayDate }: JournalInputProps) {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || "Error al procesar")
+        throw new Error(data.error || t("common.error"))
       }
 
       setText("")
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido")
+      setError(err instanceof Error ? err.message : t("common.error"))
     } finally {
       setIsLoading(false)
     }
@@ -93,7 +95,7 @@ export function JournalInput({ userId, dayId, todayDate }: JournalInputProps) {
           <div className="relative">
             <Textarea
               placeholder={
-                isListening ? "Escuchando... habla ahora" : "¿Qué tienes en mente hoy? Escribe o usa el micrófono..."
+                isListening ? t("voice.listening") : t("journal.input.placeholder")
               }
               value={text + (interimText ? (text ? " " : "") + interimText : "")}
               onChange={(e) => setText(e.target.value)}
@@ -102,7 +104,7 @@ export function JournalInput({ userId, dayId, todayDate }: JournalInputProps) {
             />
             {interimText && (
               <span className="absolute bottom-2 right-2 text-xs text-muted-foreground animate-pulse">
-                transcribiendo...
+                {t("voice.processing")}
               </span>
             )}
           </div>
@@ -114,8 +116,10 @@ export function JournalInput({ userId, dayId, todayDate }: JournalInputProps) {
               <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0" />
               <span className="leading-tight">
                 {isListening
-                  ? "Grabando..."
-                  : "La IA organizará tu texto en cards"}
+                  ? t("voice.listening")
+                  : locale === "es" 
+                    ? "La IA organizara tu texto en cards"
+                    : "AI will organize your text into cards"}
               </span>
             </p>
 
@@ -141,13 +145,13 @@ export function JournalInput({ userId, dayId, todayDate }: JournalInputProps) {
                 {isLoading ? (
                   <>
                     <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
-                    <span className="hidden sm:inline">Analizando...</span>
-                    <span className="sm:hidden">Analizar</span>
+                    <span className="hidden sm:inline">{t("journal.input.submitting")}</span>
+                    <span className="sm:hidden">{t("common.loading")}</span>
                   </>
                 ) : (
                   <>
                     <Send className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="hidden sm:inline">Enviar</span>
+                    <span className="hidden sm:inline">{t("journal.input.submitButton")}</span>
                     <span className="sm:hidden">Ok</span>
                   </>
                 )}

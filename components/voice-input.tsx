@@ -1,11 +1,14 @@
 "use client"
 
+import React from "react"
+
 import { useRef, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2, Send, Mic, Keyboard, X } from "lucide-react"
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition"
+import { useI18n } from "@/lib/i18n/context"
 import { cn } from "@/lib/utils"
 
 interface VoiceInputProps {
@@ -20,6 +23,10 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
   const [isEditingText, setIsEditingText] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
+  const { locale } = useI18n()
+
+  // Map locale to speech recognition language code
+  const speechLang = locale === "es" ? "es-ES" : "en-US"
 
   const {
     text: voiceText,
@@ -30,7 +37,7 @@ export function VoiceInput({ userId, dayId, todayDate }: VoiceInputProps) {
     stop,
     reset,
     setText,
-  } = useSpeechRecognition({ lang: "es-ES" })
+  } = useSpeechRecognition({ lang: speechLang })
 
   const currentVoiceDisplay = isListening 
     ? (voiceText || "") + (interimText ? (voiceText ? " " : "") + interimText : "")

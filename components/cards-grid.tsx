@@ -5,6 +5,7 @@ import type { CardType, CardColor, Mood } from "@/lib/types"
 import { History, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import { useI18n } from "@/lib/i18n/context"
 
 interface CardData {
   id: string
@@ -31,6 +32,7 @@ interface CardsGridProps {
 
 export function CardsGrid({ cards, dayId, isReadOnly = false, selectedDate }: CardsGridProps) {
   const router = useRouter()
+  const { t, locale } = useI18n()
 
   if (cards.length === 0) {
     if (isReadOnly) {
@@ -39,17 +41,19 @@ export function CardsGrid({ cards, dayId, isReadOnly = false, selectedDate }: Ca
           <div className="rounded-full bg-secondary p-4 mb-4">
             <History className="h-8 w-8 text-foreground/50" />
           </div>
-          <h3 className="text-lg font-medium text-foreground">Sin entradas este dia</h3>
+          <h3 className="text-lg font-medium text-foreground">
+            {locale === "es" ? "Sin entradas este dia" : "No entries this day"}
+          </h3>
           <p className="text-sm text-foreground/60 mt-1 max-w-xs">
-            No registraste ninguna entrada el{" "}
-            {new Date(selectedDate + "T00:00:00").toLocaleDateString("es-ES", {
+            {locale === "es" ? "No registraste ninguna entrada el" : "You didn't log any entries on"}{" "}
+            {new Date(selectedDate + "T00:00:00").toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
               day: "numeric",
               month: "long",
               year: "numeric",
             })}
           </p>
           <Button variant="secondary" className="mt-4" onClick={() => router.push("/app")}>
-            Ir a hoy
+            {t("datePicker.goToToday")}
           </Button>
         </div>
       )
@@ -60,9 +64,9 @@ export function CardsGrid({ cards, dayId, isReadOnly = false, selectedDate }: Ca
         <div className="rounded-full bg-secondary p-4 mb-4">
           <BookOpen className="h-8 w-8 text-foreground/50" />
         </div>
-        <h3 className="text-lg font-medium text-foreground">Sin entradas hoy</h3>
+        <h3 className="text-lg font-medium text-foreground">{t("journal.empty.title")}</h3>
         <p className="text-sm text-foreground/60 mt-1 max-w-xs">
-          Habla o escribe sobre tu dia y la IA organizara tus pensamientos
+          {t("journal.empty.subtitle")}
         </p>
       </div>
     )
@@ -73,7 +77,11 @@ export function CardsGrid({ cards, dayId, isReadOnly = false, selectedDate }: Ca
       {isReadOnly && (
         <div className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg bg-secondary text-xs sm:text-sm text-foreground/70 flex-wrap">
           <History className="h-4 w-4 flex-shrink-0" />
-          <span>Estas viendo un dia pasado. Las entradas son de solo lectura.</span>
+          <span>
+            {locale === "es" 
+              ? "Estas viendo un dia pasado. Las entradas son de solo lectura."
+              : "You are viewing a past day. Entries are read-only."}
+          </span>
         </div>
       )}
       <div className="columns-1 sm:columns-2 xl:columns-3 gap-3 sm:gap-4 md:gap-5 space-y-3 sm:space-y-4 md:space-y-5">

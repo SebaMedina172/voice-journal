@@ -5,6 +5,7 @@ import { User } from "lucide-react"
 import { DatePicker } from "@/components/date-picker"
 import { parseLocalDate } from "@/lib/date-utils"
 import Link from "next/link"
+import { useTranslation } from "@/lib/i18n/context"
 
 interface AppHeaderProps {
   userEmail: string
@@ -13,6 +14,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ userEmail, selectedDateStr }: AppHeaderProps) {
   const selectedDate = parseLocalDate(selectedDateStr)
+  const { t } = useTranslation()
 
   return (
     <header className="bg-secondary/80 backdrop-blur-sm border-b border-border sticky top-0 z-40">
@@ -37,7 +39,7 @@ export function AppHeader({ userEmail, selectedDateStr }: AppHeaderProps) {
                 className="rounded-full bg-card hover:bg-card/80 text-foreground border border-border h-8 w-8 flex-shrink-0"
               >
                 <User className="h-4 w-4" />
-                <span className="sr-only">Configuracion</span>
+                <span className="sr-only">{t("header.settings")}</span>
               </Button>
             </Link>
           </div>

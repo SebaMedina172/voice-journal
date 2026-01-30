@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
+import { useI18n } from '@/lib/i18n/context'
 
 export function GoogleConnectButton() {
   const [isConnected, setIsConnected] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isCheckingAfterConnect, setIsCheckingAfterConnect] = useState(false)
   const { toast } = useToast()
+  const { t, locale } = useI18n()
 
   // Check connection status
   const checkStatus = async () => {
@@ -39,8 +41,10 @@ export function GoogleConnectButton() {
           setIsConnected(true)
           setIsCheckingAfterConnect(false)
           toast({
-            title: 'Cuenta conectada',
-            description: 'Google Calendar y Tasks vinculados correctamente.',
+            title: locale === "es" ? 'Cuenta conectada' : 'Account connected',
+            description: locale === "es" 
+              ? 'Google Calendar y Tasks vinculados correctamente.'
+              : 'Google Calendar and Tasks linked successfully.',
           })
         }
       }
@@ -50,7 +54,7 @@ export function GoogleConnectButton() {
     return () => {
       window.removeEventListener('focus', handleFocus)
     }
-  }, [isCheckingAfterConnect, toast])
+  }, [isCheckingAfterConnect, toast, locale])
 
   const handleConnect = () => {
     setIsCheckingAfterConnect(true)
@@ -67,8 +71,10 @@ export function GoogleConnectButton() {
       if (res.ok) {
         setIsConnected(false)
         toast({
-          title: 'Cuenta desconectada',
-          description: 'Google Calendar y Tasks desvinculados.',
+          title: locale === "es" ? 'Cuenta desconectada' : 'Account disconnected',
+          description: locale === "es"
+            ? 'Google Calendar y Tasks desvinculados.'
+            : 'Google Calendar and Tasks unlinked.',
         })
       } else {
         throw new Error('Failed to disconnect')
@@ -76,8 +82,10 @@ export function GoogleConnectButton() {
     } catch (error) {
       console.error('[v0] Error disconnecting:', error)
       toast({
-        title: 'Error',
-        description: 'No se pudo desvincular la cuenta.',
+        title: t("common.error"),
+        description: locale === "es" 
+          ? 'No se pudo desvincular la cuenta.'
+          : 'Could not unlink account.',
         variant: 'destructive',
       })
     } finally {
@@ -88,7 +96,7 @@ export function GoogleConnectButton() {
   if (isLoading) {
     return (
       <Button variant="outline" size="sm" disabled>
-        Cargando...
+        {t("common.loading")}
       </Button>
     )
   }
@@ -100,7 +108,7 @@ export function GoogleConnectButton() {
         size="sm"
         onClick={handleDisconnect}
       >
-        Desvincular Google
+        {t("settings.sections.integrations.disconnect")} Google
       </Button>
     )
   }
@@ -111,7 +119,7 @@ export function GoogleConnectButton() {
       size="sm"
       onClick={handleConnect}
     >
-      Conectar Google
+      {t("settings.sections.integrations.connectGoogle")}
     </Button>
   )
 }

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useTranslation } from "@/lib/i18n/context"
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("")
@@ -18,6 +19,7 @@ export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { t } = useTranslation()
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,13 +28,13 @@ export default function SignUpPage() {
     setError(null)
 
     if (password !== repeatPassword) {
-      setError("Las contraseñas no coinciden")
+      setError(t("auth.signup.errorPasswordMismatch"))
       setIsLoading(false)
       return
     }
 
     if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres")
+      setError(t("auth.signup.errorPasswordLength"))
       setIsLoading(false)
       return
     }
@@ -47,8 +49,8 @@ export default function SignUpPage() {
       })
       if (error) throw error
       router.push("/auth/sign-up-success")
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "Ocurrió un error")
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t("auth.signup.errorGeneric"))
     } finally {
       setIsLoading(false)
     }
@@ -59,18 +61,18 @@ export default function SignUpPage() {
       <div className="w-full max-w-sm">
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-xl sm:text-2xl">Crear cuenta</CardTitle>
-            <CardDescription className="text-xs sm:text-sm">Comienza a organizar tu día con IA</CardDescription>
+            <CardTitle className="text-xl sm:text-2xl">{t("auth.signup.title")}</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">{t("auth.signup.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignUp}>
               <div className="flex flex-col gap-3 sm:gap-4">
                 <div className="grid gap-1.5 sm:gap-2">
-                  <Label htmlFor="email" className="text-xs sm:text-sm">Email</Label>
+                  <Label htmlFor="email" className="text-xs sm:text-sm">{t("auth.signup.emailLabel")}</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="tu@email.com"
+                    placeholder={t("auth.signup.emailPlaceholder")}
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -78,10 +80,11 @@ export default function SignUpPage() {
                   />
                 </div>
                 <div className="grid gap-1.5 sm:gap-2">
-                  <Label htmlFor="password" className="text-xs sm:text-sm">Contraseña</Label>
+                  <Label htmlFor="password" className="text-xs sm:text-sm">{t("auth.signup.passwordLabel")}</Label>
                   <Input
                     id="password"
                     type="password"
+                    placeholder={t("auth.signup.passwordPlaceholder")}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -89,10 +92,11 @@ export default function SignUpPage() {
                   />
                 </div>
                 <div className="grid gap-1.5 sm:gap-2">
-                  <Label htmlFor="repeat-password" className="text-xs sm:text-sm">Repetir contraseña</Label>
+                  <Label htmlFor="repeat-password" className="text-xs sm:text-sm">{t("auth.signup.confirmPasswordLabel")}</Label>
                   <Input
                     id="repeat-password"
                     type="password"
+                    placeholder={t("auth.signup.confirmPasswordPlaceholder")}
                     required
                     value={repeatPassword}
                     onChange={(e) => setRepeatPassword(e.target.value)}
@@ -101,13 +105,13 @@ export default function SignUpPage() {
                 </div>
                 {error && <p className="text-xs sm:text-sm text-destructive">{error}</p>}
                 <Button type="submit" className="w-full text-sm sm:text-base" disabled={isLoading}>
-                  {isLoading ? "Creando cuenta..." : "Crear cuenta"}
+                  {isLoading ? t("auth.signup.loadingButton") : t("auth.signup.submitButton")}
                 </Button>
               </div>
               <div className="mt-3 sm:mt-4 text-center text-xs sm:text-sm">
-                ¿Ya tienes cuenta?{" "}
+                {t("auth.signup.hasAccount")}{" "}
                 <Link href="/auth/login" className="underline underline-offset-4">
-                  Inicia sesión
+                  {t("auth.signup.loginLink")}
                 </Link>
               </div>
             </form>

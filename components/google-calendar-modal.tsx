@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Calendar, Clock, Bell, Loader2 } from "lucide-react"
+import { useI18n } from "@/lib/i18n/context"
 
 interface GoogleCalendarModalProps {
   isOpen: boolean
@@ -46,16 +47,6 @@ export interface CalendarEventData {
   reminder: string
 }
 
-const REMINDER_OPTIONS = [
-  { value: "none", label: "Sin recordatorio" },
-  { value: "0", label: "Al momento del evento" },
-  { value: "5", label: "5 minutos antes" },
-  { value: "15", label: "15 minutos antes" },
-  { value: "30", label: "30 minutos antes" },
-  { value: "60", label: "1 hora antes" },
-  { value: "1440", label: "1 dia antes" },
-]
-
 export function GoogleCalendarModal({
   isOpen,
   onClose,
@@ -63,6 +54,7 @@ export function GoogleCalendarModal({
   initialData,
   previouslySynced = false,
 }: GoogleCalendarModalProps) {
+  const { t, locale } = useI18n()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [startDate, setStartDate] = useState("")
@@ -71,6 +63,16 @@ export function GoogleCalendarModal({
   const [endTime, setEndTime] = useState("10:00")
   const [reminder, setReminder] = useState("15")
   const [isSyncing, setIsSyncing] = useState(false)
+
+  const REMINDER_OPTIONS = [
+    { value: "none", label: locale === "es" ? "Sin recordatorio" : "No reminder" },
+    { value: "0", label: locale === "es" ? "Al momento del evento" : "At time of event" },
+    { value: "5", label: locale === "es" ? "5 minutos antes" : "5 minutes before" },
+    { value: "15", label: locale === "es" ? "15 minutos antes" : "15 minutes before" },
+    { value: "30", label: locale === "es" ? "30 minutos antes" : "30 minutes before" },
+    { value: "60", label: locale === "es" ? "1 hora antes" : "1 hour before" },
+    { value: "1440", label: locale === "es" ? "1 dia antes" : "1 day before" },
+  ]
 
   // Pre-populate fields when modal opens or initialData changes
   useEffect(() => {
@@ -126,10 +128,14 @@ export function GoogleCalendarModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground pr-8">
             <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-            <span className="text-sm sm:text-base">Crear Evento en Calendar</span>
+            <span className="text-sm sm:text-base">
+              {locale === "es" ? "Crear Evento en Calendar" : "Create Calendar Event"}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
-            Revisa y modifica los datos antes de sincronizar con Google Calendar.
+            {locale === "es" 
+              ? "Revisa y modifica los datos antes de sincronizar con Google Calendar."
+              : "Review and modify the data before syncing with Google Calendar."}
           </DialogDescription>
         </DialogHeader>
 
@@ -138,19 +144,23 @@ export function GoogleCalendarModal({
           {previouslySynced && (
             <div className="rounded-md bg-amber-500/10 border border-amber-500/30 p-3">
               <p className="text-sm text-amber-600 dark:text-amber-400">
-                Esta card ya fue sincronizada anteriormente. Se creara un nuevo evento en tu calendario.
+                {locale === "es"
+                  ? "Esta card ya fue sincronizada anteriormente. Se creara un nuevo evento en tu calendario."
+                  : "This card was previously synced. A new event will be created in your calendar."}
               </p>
             </div>
           )}
 
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="event-title">Titulo</Label>
+            <Label htmlFor="event-title">
+              {locale === "es" ? "Titulo" : "Title"}
+            </Label>
             <Input
               id="event-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Titulo del evento"
+              placeholder={locale === "es" ? "Titulo del evento" : "Event title"}
               className="bg-input"
               required
             />
@@ -158,12 +168,14 @@ export function GoogleCalendarModal({
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="event-description">Descripcion</Label>
+            <Label htmlFor="event-description">
+              {locale === "es" ? "Descripcion" : "Description"}
+            </Label>
             <Textarea
               id="event-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Descripcion del evento (opcional)"
+              placeholder={locale === "es" ? "Descripcion del evento (opcional)" : "Event description (optional)"}
               className="bg-input min-h-[80px] resize-none"
             />
           </div>
@@ -173,7 +185,7 @@ export function GoogleCalendarModal({
             <div className="space-y-2">
               <Label htmlFor="start-date" className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                Fecha inicio
+                {locale === "es" ? "Fecha inicio" : "Start date"}
               </Label>
               <Input
                 id="start-date"
@@ -193,7 +205,7 @@ export function GoogleCalendarModal({
             <div className="space-y-2">
               <Label htmlFor="start-time" className="flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                Hora inicio
+                {locale === "es" ? "Hora inicio" : "Start time"}
               </Label>
               <Input
                 id="start-time"
@@ -211,7 +223,7 @@ export function GoogleCalendarModal({
             <div className="space-y-2">
               <Label htmlFor="end-date" className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                Fecha fin
+                {locale === "es" ? "Fecha fin" : "End date"}
               </Label>
               <Input
                 id="end-date"
@@ -226,7 +238,7 @@ export function GoogleCalendarModal({
             <div className="space-y-2">
               <Label htmlFor="end-time" className="flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                Hora fin
+                {locale === "es" ? "Hora fin" : "End time"}
               </Label>
               <Input
                 id="end-time"
@@ -243,11 +255,11 @@ export function GoogleCalendarModal({
           <div className="space-y-2">
             <Label htmlFor="reminder" className="flex items-center gap-1.5">
               <Bell className="h-3.5 w-3.5 text-muted-foreground" />
-              Recordatorio
+              {locale === "es" ? "Recordatorio" : "Reminder"}
             </Label>
             <Select value={reminder} onValueChange={setReminder}>
               <SelectTrigger className="w-full bg-input">
-                <SelectValue placeholder="Seleccionar recordatorio" />
+                <SelectValue placeholder={locale === "es" ? "Seleccionar recordatorio" : "Select reminder"} />
               </SelectTrigger>
               <SelectContent>
                 {REMINDER_OPTIONS.map((option) => (
@@ -266,7 +278,7 @@ export function GoogleCalendarModal({
               onClick={handleClose}
               disabled={isSyncing}
             >
-              Cancelar
+              {t("common.cancel")}
             </Button>
             <Button
               type="submit"
@@ -276,12 +288,12 @@ export function GoogleCalendarModal({
               {isSyncing ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Sincronizando...
+                  {locale === "es" ? "Sincronizando..." : "Syncing..."}
                 </>
               ) : (
                 <>
                   <Calendar className="h-4 w-4" />
-                  Crear Evento
+                  {locale === "es" ? "Crear Evento" : "Create Event"}
                 </>
               )}
             </Button>
