@@ -1,6 +1,10 @@
 "use client"
 import { useState, useEffect, useCallback, useRef } from "react"
 
+const RESTART_DELAY_MS = 400
+const MAX_CONSECUTIVE_FAILURES = 3
+const USE_WAKE_LOCK = true
+
 interface UseSpeechRecognitionOptions {
   lang?: string
 }
@@ -13,121 +17,261 @@ interface UseSpeechRecognitionReturn {
   start: () => void
   stop: () => void
   reset: () => void
-  setText: (text: string) => void 
+  setText: (text: string) => void
 }
 
-export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}): UseSpeechRecognitionReturn {
+export function useSpeechRecognition(
+  options: UseSpeechRecognitionOptions = {},
+): UseSpeechRecognitionReturn {
   const { lang = "es-ES" } = options
-  
+
   const [text, setTextState] = useState("")
   const [interimText, setInterimText] = useState("")
   const [isListening, setIsListening] = useState(false)
   const [isSupported, setIsSupported] = useState(false)
-  
+
   const recognitionRef = useRef<SpeechRecognition | null>(null)
-  const isListeningRef = useRef(isListening)
-  const accumulatedTextRef = useRef("") 
+  const shouldKeepListeningRef = useRef(false)
+  const accumulatedTextRef = useRef("")
+  const consecutiveFailuresRef = useRef(0)
+  const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const wakeLockRef = useRef<any>(null)
+  const isRecreatingRef = useRef(false)
 
   const handleSetText = useCallback((newText: string) => {
     setTextState(newText)
     accumulatedTextRef.current = newText
   }, [])
 
-  useEffect(() => {
-    isListeningRef.current = isListening
-  }, [isListening])
+  const requestWakeLock = useCallback(async () => {
+    if (!USE_WAKE_LOCK || typeof window === "undefined") return
+    if (!("wakeLock" in navigator)) return
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition
-      
-      if (SpeechRecognitionAPI) {
-        setIsSupported(true)
-        const recognition = new SpeechRecognitionAPI()
-        
-        recognition.lang = lang
-        recognition.continuous = false 
-        recognition.interimResults = true
+    try {
+      wakeLockRef.current = await (navigator as any).wakeLock.request("screen")
+    } catch (err) {
+      console.warn("Wake Lock request failed:", err)
+    }
+  }, [])
 
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
-          let newFinalText = ""
-          let currentInterim = ""
+  const releaseWakeLock = useCallback(async () => {
+    if (!wakeLockRef.current) return
+    try {
+      await wakeLockRef.current.release()
+      wakeLockRef.current = null
+    } catch (err) {
+      console.warn("Wake Lock release failed:", err)
+    }
+  }, [])
 
-          for (let i = 0; i < event.results.length; i++) {
-            const result = event.results[i]
-            const transcript = result[0].transcript
-            
-            if (result.isFinal) {
-              newFinalText += transcript
-            } else {
-              currentInterim += transcript
-            }
-          }
+  const createRecognition = useCallback(() => {
+    if (typeof window === "undefined") return null
 
-          if (newFinalText) {
-            const prevText = accumulatedTextRef.current
+    const SpeechRecognitionAPI =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition
 
-            const separator = prevText && !prevText.endsWith(" ") ? " " : ""
-            const finalTextCombined = prevText + separator + newFinalText
-            
-            accumulatedTextRef.current = finalTextCombined
-            setTextState(finalTextCombined)
-            setInterimText("")
-          } else {
-            setInterimText(currentInterim)
-          }
+    if (!SpeechRecognitionAPI) return null
+
+    const recognition = new SpeechRecognitionAPI() as SpeechRecognition
+    recognition.lang = lang
+    recognition.continuous = false
+    recognition.interimResults = true
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      consecutiveFailuresRef.current = 0
+
+      let newFinalText = ""
+      let currentInterim = ""
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i]
+        const transcript = result[0].transcript
+
+        if (result.isFinal) {
+          newFinalText += transcript
+        } else {
+          currentInterim += transcript
         }
+      }
 
-        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-          if (event.error !== "no-speech" && event.error !== "aborted") {
-            setIsListening(false)
-          }
-        }
+      if (newFinalText) {
+        const prev = accumulatedTextRef.current
+        const separator = prev && !prev.endsWith(" ") ? " " : ""
+        const combined = prev + separator + newFinalText
 
-        recognition.onend = () => {
-          if (isListeningRef.current) {
-            try {
-              recognition.start()
-            } catch (e) {
-              setIsListening(false)
-            }
-          } else {
-            setIsListening(false)
-            setInterimText("")
-          }
-        }
-
-        recognitionRef.current = recognition
+        accumulatedTextRef.current = combined
+        setTextState(combined)
+        setInterimText("")
+      } else {
+        setInterimText(currentInterim)
       }
     }
+
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      if (event.error === "no-speech" || event.error === "aborted") return
+
+      if (
+        event.error === "not-allowed" ||
+        event.error === "service-not-allowed"
+      ) {
+        shouldKeepListeningRef.current = false
+        setIsListening(false)
+        setInterimText("")
+        releaseWakeLock()
+        return
+      }
+
+      consecutiveFailuresRef.current += 1
+      if (consecutiveFailuresRef.current >= MAX_CONSECUTIVE_FAILURES) {
+        shouldKeepListeningRef.current = false
+        setIsListening(false)
+        setInterimText("")
+        releaseWakeLock()
+      }
+    }
+
+    recognition.onend = () => {
+      setInterimText("")
+
+      if (!shouldKeepListeningRef.current) {
+        setIsListening(false)
+        releaseWakeLock()
+        return
+      }
+
+      if (isRecreatingRef.current) return
+
+      restartTimerRef.current = setTimeout(() => {
+        if (!shouldKeepListeningRef.current) {
+          setIsListening(false)
+          releaseWakeLock()
+          return
+        }
+
+        try {
+          recognition.start()
+        } catch {
+          consecutiveFailuresRef.current += 1
+          if (consecutiveFailuresRef.current >= MAX_CONSECUTIVE_FAILURES) {
+            shouldKeepListeningRef.current = false
+            setIsListening(false)
+            releaseWakeLock()
+          }
+        }
+      }, RESTART_DELAY_MS)
+    }
+
+    return recognition
+  }, [lang, releaseWakeLock])
+
+  useEffect(() => {
+    const rec = createRecognition()
+    if (!rec) {
+      setIsSupported(false)
+      return
+    }
+
+    setIsSupported(true)
+    recognitionRef.current = rec
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (shouldKeepListeningRef.current && recognitionRef.current) {
+          try {
+            recognitionRef.current.abort()
+          } catch {}
+          if (restartTimerRef.current) {
+            clearTimeout(restartTimerRef.current)
+            restartTimerRef.current = null
+          }
+        }
+      } else {
+        if (shouldKeepListeningRef.current) {
+          isRecreatingRef.current = true
+
+          if (recognitionRef.current) {
+            try {
+              recognitionRef.current.abort()
+            } catch {}
+          }
+
+          const newRec = createRecognition()
+          if (newRec) {
+            recognitionRef.current = newRec
+            consecutiveFailuresRef.current = 0
+
+            setTimeout(() => {
+              isRecreatingRef.current = false
+              try {
+                newRec.start()
+                setIsListening(true)
+              } catch {
+                shouldKeepListeningRef.current = false
+                setIsListening(false)
+                releaseWakeLock()
+              }
+            }, 300)
+          } else {
+            shouldKeepListeningRef.current = false
+            setIsListening(false)
+            releaseWakeLock()
+          }
+        }
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
 
     return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      if (restartTimerRef.current) clearTimeout(restartTimerRef.current)
       if (recognitionRef.current) {
-        recognitionRef.current.abort()
+        try {
+          recognitionRef.current.abort()
+        } catch {}
       }
+      releaseWakeLock()
     }
-  }, [lang])
+  }, [createRecognition, releaseWakeLock])
 
   const start = useCallback(() => {
-    if (recognitionRef.current && !isListening) {
-      try {
-        accumulatedTextRef.current = text 
-        
-        recognitionRef.current.start()
-        setIsListening(true)
-      } catch (e) {
-        console.error(e)
-      }
+    if (!recognitionRef.current || isListening) return
+
+    accumulatedTextRef.current = text
+    consecutiveFailuresRef.current = 0
+    shouldKeepListeningRef.current = true
+
+    requestWakeLock()
+
+    try {
+      recognitionRef.current.start()
+      setIsListening(true)
+    } catch {
+      shouldKeepListeningRef.current = false
+      setIsListening(false)
+      releaseWakeLock()
     }
-  }, [isListening, text])
+  }, [isListening, text, requestWakeLock, releaseWakeLock])
 
   const stop = useCallback(() => {
-    if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop()
-      setIsListening(false)
-      setInterimText("")
+    if (restartTimerRef.current) {
+      clearTimeout(restartTimerRef.current)
+      restartTimerRef.current = null
     }
-  }, [isListening])
+
+    shouldKeepListeningRef.current = false
+
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop()
+      } catch {}
+    }
+
+    setIsListening(false)
+    setInterimText("")
+    releaseWakeLock()
+  }, [releaseWakeLock])
 
   const reset = useCallback(() => {
     accumulatedTextRef.current = ""
